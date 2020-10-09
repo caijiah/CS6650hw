@@ -1,4 +1,5 @@
 #include "ClientStub.h"
+#include "Order.h"
 
 #include <iostream>
 #include <stdlib.h>
@@ -7,7 +8,8 @@
 #include <chrono>
 #include <list>
 #include <numeric>
-#include <algorithm> 
+#include <algorithm>
+#include <string>
 
 
 using namespace std;
@@ -15,18 +17,18 @@ mutex mtx;
 list<long long> latencies_record;
 
 // help function that simply use stoi but with error handling
-int string_to_int(std::string str) {
+int string_to_int(string str) {
     try {
         return std::stoi(str);
-        } catch (std::invalid_argument& e) {
-			std::cerr << "Error: Invalid input: " << str 
-			<< ". Please check." << std::endl;
+        } catch (invalid_argument& e) {
+			cerr << "Error: Invalid input: " << str 
+			<< ". Please check." << endl;
             exit(1);
         }   
 }
 
 void make_orders(
-	std::unique_ptr<ClientStub> cli_stub,
+	unique_ptr<ClientStub> cli_stub,
 	unsigned int customer_id, 
 	unsigned int num_orders,
 	unsigned int robot_type
@@ -47,8 +49,8 @@ void make_orders(
 
 int main(int argc, char *argv[]) {
 	if (argc < 6) {
-        std::cerr << "Please type these 6 arguments: [ip addr] [port #]"
-		<< " [# customers] [# orders] [robot type]" << std::endl;
+        cerr << "Please type these 6 arguments: [ip addr] [port #]"
+		<< " [# customers] [# orders] [robot type]" << endl;
 		exit(1);
 	}
 
@@ -61,13 +63,13 @@ int main(int argc, char *argv[]) {
 	robot_type = string_to_int(argv[5]);
 
 	// create the customer threads as many as customer number:
-	std::thread customer_threads[num_customers];
+	thread customer_threads[num_customers];
 	
 	auto main_start = chrono::high_resolution_clock::now();
 	for (unsigned int i = 0; i < num_customers; i++) {
 		std::unique_ptr<ClientStub> cli_stub;
 		cli_stub->Init(ip_addr, port_num);
-		customer_threads[i] = std::thread(make_orders, std::move(cli_stub), i, num_orders, robot_type);
+		customer_threads[i] = thread(make_orders, move(cli_stub), i, num_orders, robot_type);
 	}
 
 	for (unsigned int i = 0; i < num_customers; i++) {
