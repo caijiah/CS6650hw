@@ -11,8 +11,8 @@
 #include <algorithm>
 #include <string>
 
-
 using namespace std;
+
 mutex mtx;
 list<long long> latencies_record;
 
