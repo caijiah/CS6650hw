@@ -12,7 +12,7 @@
 
 
 // takes a connect socket fd
-ServerStub::ServerStub(int socket_fd) {
+void ServerStub::Init(int socket_fd) {
     ser_sock = socket_fd;
 }
 

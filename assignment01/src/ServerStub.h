@@ -17,7 +17,7 @@
 class ServerStub{
     int ser_sock;
 public:
-    ServerStub(int socket_fd);
+    void Init(int socket_fd);
     ~ServerStub();
     std::unique_ptr<Order> ReceiveOrder();
     void ShipRobot(RobotInfo robot_info);
