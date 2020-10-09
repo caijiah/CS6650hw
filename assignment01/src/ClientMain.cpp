@@ -55,7 +55,8 @@ int main(int argc, char *argv[]) {
 	}
 
     // assign given arguments
-    std::string ip_addr = argv[1];
+        cout << "parse" << endl;
+    	string ip_addr = argv[1];
 	int port_num = string_to_int(argv[2]);
 	unsigned int num_customers, num_orders, robot_type;
 	num_customers = string_to_int(argv[3]);
@@ -67,9 +68,8 @@ int main(int argc, char *argv[]) {
 	
 	auto main_start = chrono::high_resolution_clock::now();
 	for (unsigned int i = 0; i < num_customers; i++) {
-		std::unique_ptr<ClientStub> cli_stub;
-		cli_stub->Init(ip_addr, port_num);
-		customer_threads[i] = thread(make_orders, move(cli_stub), i, num_orders, robot_type);
+		std::unique_ptr<ClientStub> cli_stub = unique_ptr<ClientStub>(new ClientStub(ip_addr, port_num));
+                customer_threads[i] = thread(make_orders, move(cli_stub), i, num_orders, robot_type);
 	}
 
 	for (unsigned int i = 0; i < num_customers; i++) {
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 	double avg_latency = sum_latency / total_orders;
 	double throughput = total_orders / overall_elapsed;
 	// prints as [avg latency] [min latency] [max latency] [throughput]
-	std::cout << avg_latency << '\t' << min_latency << '\t' << max_latency << '\t' << throughput << std::endl;
+	cout << avg_latency << '\t' << min_latency << '\t' << max_latency << '\t' << throughput << endl;
 
 	return 0;
 }

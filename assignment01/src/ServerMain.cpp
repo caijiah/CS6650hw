@@ -91,12 +91,13 @@ void expert_process_orders(
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
-        std::cerr << "Please type these 2 arguments: [port #]"
-        << " [# experts]" << std::endl;
+        cerr << "Please type these 2 arguments: [port #]"
+        << " [# experts]" << endl;
         exit(1);
     }
-    
+    cout << "main 1" << endl;
     int port_num = string_to_int(argv[1]);
+    cout << "create sock" << endl;
     ServerSocket sock = ServerSocket(port_num);
     int experts_num = string_to_int(argv[2]);
     
@@ -104,16 +105,19 @@ int main(int argc, char *argv[]) {
     list<thread> experts_pool;
     
     int engineer_id = 0;
-    
+    cout << "main 2" << endl;
+
     for (int i = 0; i < experts_num; i++) {
         experts_pool.push_back(std::thread(expert_process_orders, engineer_id));
         engineer_id++;
     }
+    cout << "main 3" << endl;
     
     while (true) {
         int connected_new_fd = sock.ser_sock_accept();
-        unique_ptr<ServerStub> ser_stub;
+        unique_ptr<ServerStub> ser_stub = unique_ptr<ServerStub>(new ServerStub());
         ser_stub->Init(connected_new_fd);
+    cout << "stub init" << endl;
         engineers.push_back(thread(process_orders, move(ser_stub), engineer_id));
         engineer_id++;
     }

@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 #include <memory>
 
+ServerStub::ServerStub() {}
 
 // takes a connect socket fd
 void ServerStub::Init(int socket_fd) {

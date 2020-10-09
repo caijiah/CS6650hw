@@ -22,7 +22,7 @@ public:
     void cli_sock_connect();
     void cli_sock_close();
     void send_msg(char* buffer, std::size_t size);
-    void recv_msg(char* buffer);
+    int recv_msg(char* buffer, std::size_t size);
 };
 
 #endif /* ClientSocket_h */

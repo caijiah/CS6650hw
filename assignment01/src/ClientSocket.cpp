@@ -6,6 +6,7 @@
 
 #include "ClientSocket.h"
 #include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
@@ -22,11 +23,15 @@ ClientSocket::ClientSocket(std::string ip, int port) {
         perror("server: socket");
         exit(1);
     }
-    
+    std::cout << "in socket creation" << std::endl;
     memset(&servinfo, '\0', sizeof(servinfo));
+std::cout << "in socket creation2" << std::endl;
     servinfo.sin_family = AF_INET;
+std::cout << "in socket creation3" << std::endl;
     servinfo.sin_port = htons(port);
+std::cout << "in socket creation4" << std::endl;
     servinfo.sin_addr.s_addr = inet_addr(ip.c_str());
+std::cout << "in socket creation5" << std::endl;
 }
 
 ClientSocket::~ClientSocket() {
@@ -34,8 +39,8 @@ ClientSocket::~ClientSocket() {
 }
 
 void ClientSocket::cli_sock_connect() {
-    if (connect(sockfd, (struct sockaddr *) &servinfo, sizeof(servinfo)) == -1) {
-        close(sockfd);
+    std::cout << "before connect" << std::endl;
+    if (connect(sockfd, (struct sockaddr *) &servinfo, sizeof(servinfo)) != 0) {
         perror("client: connect");
         exit(1);
     }
@@ -54,10 +59,12 @@ void ClientSocket::send_msg(char* buffer, std::size_t size) {
     }
 }
 
-void ClientSocket::recv_msg(char* buffer) {
-    if (recv(sockfd, buffer, 1024, 0) == -1) {
+int ClientSocket::recv_msg(char* buffer, std::size_t size) {
+    int rv;
+    if ((rv = recv(sockfd, buffer, size, 0)) == -1) {
         perror("client: recv");
         close(sockfd);
         exit(1);
     }
+    return rv;
 }

@@ -15,10 +15,11 @@
 
 
 class ClientStub {
+private:
     ClientSocket client_socket;
 public:
     // initilizez the client stub and establishes a new TCP connection
-    void Init(std::string ip, int port);
+    ClientStub(std::string ip, int port);
     std::unique_ptr<RobotInfo> order(std::unique_ptr<Order> order);
     void disconnect();
 };

@@ -17,6 +17,7 @@
 class ServerStub{
     int ser_sock;
 public:
+    ServerStub();
     void Init(int socket_fd);
     ~ServerStub();
     std::unique_ptr<Order> ReceiveOrder();
