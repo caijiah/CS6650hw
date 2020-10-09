@@ -51,6 +51,6 @@ std::unique_ptr<Order> Order::unmarshal(char* receive) {
 }
 
 
-bool Order::is_expert_required() {
+bool Order::need_an_expert() {
     return robot_type == 1;
 }

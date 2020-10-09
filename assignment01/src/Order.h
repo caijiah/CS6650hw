@@ -27,7 +27,7 @@ public:
     char* marshal();
     // help function for unmarshaling
     static std::unique_ptr<Order> unmarshal(char* byte_stream);
-    bool is_expert_required();
+    bool need_an_expert();
 };
 
 #endif /* Order_h */
