@@ -16,7 +16,7 @@
 ServerSocket::ServerSocket(int given_port) {
     sockfd =  socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
-        perror("server: socket");
+        std::cerr << "ServerSocket: Fail to create a socket." << std::endl;
     }
     
     struct sockaddr_in serv_addr;
@@ -28,11 +28,11 @@ ServerSocket::ServerSocket(int given_port) {
     if (bind(sockfd, (struct sockaddr *) &serv_addr,
              sizeof(serv_addr)) == -1) {
         close(sockfd);
-        perror("server: bind");
+        std::cerr << "ClientSocket: Fail to bind." << std::endl;
     }
     
     if (listen(sockfd, SOMAXCONN) == -1) {
-        perror("listen");
+        std::cerr << "ClientSocket: Fail to listen." << std::endl;
         exit(1);
     }
 };
@@ -47,7 +47,7 @@ int ServerSocket::ser_sock_accept() {
     socklen_t sin_size = sizeof(client_addr);
     int new_fd = accept(sockfd, (struct sockaddr *)&client_addr, &sin_size);
     if (new_fd == -1) {
-        perror("accept");
+        std::cerr << "ClientSocket: Fail to accept." << std::endl;
         exit(1);
     }
     return new_fd;

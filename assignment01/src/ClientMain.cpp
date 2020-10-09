@@ -19,7 +19,7 @@ list<long long> latencies_record;
 // help function that simply use stoi but with error handling
 int string_to_int(string str) {
     try {
-        return std::stoi(str);
+        return stoi(str);
         } catch (invalid_argument& e) {
 			cerr << "Error: Invalid input: " << str 
 			<< ". Please check." << endl;
@@ -36,9 +36,9 @@ void make_orders(
 	// each customer takes # orders
 	for (unsigned int i = 0; i < num_orders; i++) {
         unique_ptr<Order> order = unique_ptr<Order>(new Order(customer_id, i, robot_type));
-		auto start = std::chrono::high_resolution_clock::now();
-		cli_stub->order(std::move(order));
-		auto end = std::chrono::high_resolution_clock::now();
+		auto start = chrono::high_resolution_clock::now();
+		cli_stub->order(move(order));
+		auto end = chrono::high_resolution_clock::now();
 		long long elapsed_time = chrono::duration_cast<chrono::microseconds>(end - start).count();
 		mtx.lock();
 		latencies_record.push_back(elapsed_time);
@@ -55,8 +55,7 @@ int main(int argc, char *argv[]) {
 	}
 
     // assign given arguments
-        cout << "parse" << endl;
-    	string ip_addr = argv[1];
+    string ip_addr = argv[1];
 	int port_num = string_to_int(argv[2]);
 	unsigned int num_customers, num_orders, robot_type;
 	num_customers = string_to_int(argv[3]);
@@ -68,8 +67,8 @@ int main(int argc, char *argv[]) {
 	
 	auto main_start = chrono::high_resolution_clock::now();
 	for (unsigned int i = 0; i < num_customers; i++) {
-		std::unique_ptr<ClientStub> cli_stub = unique_ptr<ClientStub>(new ClientStub(ip_addr, port_num));
-                customer_threads[i] = thread(make_orders, move(cli_stub), i, num_orders, robot_type);
+		unique_ptr<ClientStub> cli_stub = unique_ptr<ClientStub>(new ClientStub(ip_addr, port_num));
+		customer_threads[i] = thread(make_orders, move(cli_stub), i, num_orders, robot_type);
 	}
 
 	for (unsigned int i = 0; i < num_customers; i++) {

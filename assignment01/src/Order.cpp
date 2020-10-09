@@ -32,7 +32,6 @@ char* Order::marshal() {
     memcpy(buffer, &net_customer_id, int_size);
     memcpy(buffer + int_size, &net_order_number, int_size);
     memcpy(buffer + int_size * 2, &net_robot_type, int_size);
-    std::cout << "Order is marshalled as: " << customer_id << ", " << order_number << ", " << robot_type << std::endl;
     return buffer;
 }
 
@@ -46,7 +45,6 @@ std::unique_ptr<Order> Order::unmarshal(char* receive) {
     h_customer_id = ntohl(r_customer_id);
     h_order_number = ntohl(r_order_number);
     h_robot_type = ntohl(r_robot_type);
-    std::cout << "Order is unmarshalled as: " << h_customer_id << ", " << h_order_number << ", " << h_robot_type << std::endl;
     return std::unique_ptr<Order>(new Order(h_customer_id, h_order_number, h_robot_type));
 }
 

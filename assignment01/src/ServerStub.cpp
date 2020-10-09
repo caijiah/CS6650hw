@@ -30,7 +30,6 @@ std::unique_ptr<Order> ServerStub::ReceiveOrder() {
     // number of bytes received.
     while (numbytes < 0) {
         numbytes = recv(ser_sock, buffer, order_size, 0);
-        std::cout << "bytes recieved: " << numbytes << std::endl;
     }
     if (numbytes == 0) {
         throw "Client disconnected";

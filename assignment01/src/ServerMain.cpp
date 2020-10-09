@@ -20,23 +20,26 @@ map<unsigned int, int>engineer_assign_expert;
 condition_variable expert_cv;
 condition_variable engineer_cv;
 
+list<thread> engineers;
+list<thread> experts_pool;
+
 // help function that simply use stoi but with error handling
-int string_to_int(std::string str) {
+int string_to_int(string str) {
     try {
-        return std::stoi(str);
-    } catch (std::invalid_argument& e) {
-        std::cerr << "Error: Invalid input: " << str
-        << ". Please check." << std::endl;
+        return stoi(str);
+    } catch (invalid_argument& e) {
+        cerr << "Error: Invalid input: " << str
+        << ". Please check." << endl;
         exit(1);
     }
 }
 
 void process_orders(
-                    std::unique_ptr<ServerStub> ser_stub,
+                    unique_ptr<ServerStub> ser_stub,
                     unsigned int engineer_id
                     ) {
     while (true) {
-        std::unique_ptr<Order> order;
+        unique_ptr<Order> order;
         
         try {
             order = ser_stub->ReceiveOrder();
@@ -46,12 +49,17 @@ void process_orders(
         
         int expert_id = -1;
         if (order->need_an_expert()) {
+            if (experts_pool.empty()) {
+                cerr << "There's no experts for your order now. "
+                << "Please contact us." << endl;
+                exit(1);
+            }
             // lock, since we push reqs to the shared queue
             que_mtx.lock();
             shared_reqs_queue.push(engineer_id);
             que_mtx.unlock();
             expert_cv.notify_one();
-            
+        
             while (true) {
                 unique_lock<mutex> map_lock(map_mtx);
                 auto assign_itr = engineer_assign_expert.find(engineer_id);
@@ -73,7 +81,7 @@ void expert_process_orders(
                            unsigned int expert_id
                            ) {
     while (true) {
-        unique_lock<std::mutex> que_lock(que_mtx);
+        unique_lock<mutex> que_lock(que_mtx);
         if (shared_reqs_queue.size() == 0) {
             expert_cv.wait(que_lock);
         } else {
@@ -95,29 +103,21 @@ int main(int argc, char *argv[]) {
         << " [# experts]" << endl;
         exit(1);
     }
-    cout << "main 1" << endl;
     int port_num = string_to_int(argv[1]);
-    cout << "create sock" << endl;
     ServerSocket sock = ServerSocket(port_num);
     int experts_num = string_to_int(argv[2]);
-    
-    list<thread> engineers;
-    list<thread> experts_pool;
-    
+
     int engineer_id = 0;
-    cout << "main 2" << endl;
 
     for (int i = 0; i < experts_num; i++) {
-        experts_pool.push_back(std::thread(expert_process_orders, engineer_id));
+        experts_pool.push_back(thread(expert_process_orders, engineer_id));
         engineer_id++;
     }
-    cout << "main 3" << endl;
     
     while (true) {
         int connected_new_fd = sock.ser_sock_accept();
         unique_ptr<ServerStub> ser_stub = unique_ptr<ServerStub>(new ServerStub());
         ser_stub->Init(connected_new_fd);
-    cout << "stub init" << endl;
         engineers.push_back(thread(process_orders, move(ser_stub), engineer_id));
         engineer_id++;
     }

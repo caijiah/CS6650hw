@@ -46,6 +46,5 @@ std::unique_ptr<RobotInfo> RobotInfo::unmarshal(char* receive) {
     memcpy(&r_expert_id, receive + int_size * 4, int_size);
     h_engineer_id = ntohl(r_engineer_id);
     h_expert_id = ntohl(r_expert_id);
-    std::cout << "RobotInfo is unmarshalled as: " << h_engineer_id << ", " << h_expert_id << std::endl;
     return std::unique_ptr<RobotInfo>(new RobotInfo(*order_p, r_engineer_id, r_expert_id));
 }

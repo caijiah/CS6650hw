@@ -20,18 +20,13 @@
 ClientSocket::ClientSocket(std::string ip, int port) {
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
-        perror("server: socket");
+        std::cerr << "ClientSocket: Fail to create a socket" << std::endl;
         exit(1);
     }
-    std::cout << "in socket creation" << std::endl;
     memset(&servinfo, '\0', sizeof(servinfo));
-std::cout << "in socket creation2" << std::endl;
     servinfo.sin_family = AF_INET;
-std::cout << "in socket creation3" << std::endl;
     servinfo.sin_port = htons(port);
-std::cout << "in socket creation4" << std::endl;
     servinfo.sin_addr.s_addr = inet_addr(ip.c_str());
-std::cout << "in socket creation5" << std::endl;
 }
 
 ClientSocket::~ClientSocket() {
@@ -39,9 +34,8 @@ ClientSocket::~ClientSocket() {
 }
 
 void ClientSocket::cli_sock_connect() {
-    std::cout << "before connect" << std::endl;
     if (connect(sockfd, (struct sockaddr *) &servinfo, sizeof(servinfo)) != 0) {
-        perror("client: connect");
+        std::cerr << "ClientSocket: Fail to connect." << std::endl;
         exit(1);
     }
 }
@@ -53,7 +47,7 @@ void ClientSocket::cli_sock_close() {
 
 void ClientSocket::send_msg(char* buffer, std::size_t size) {
     if (send(sockfd, buffer, size, 0) == -1) {
-        perror("client: send");
+        std::cerr << "ClientSocket: Fail to send." << std::endl;
         close(sockfd);
         exit(1);
     }
@@ -62,7 +56,7 @@ void ClientSocket::send_msg(char* buffer, std::size_t size) {
 int ClientSocket::recv_msg(char* buffer, std::size_t size) {
     int rv;
     if ((rv = recv(sockfd, buffer, size, 0)) == -1) {
-        perror("client: recv");
+        std::cerr << "ClientSocket: Fail to receive." << std::endl;
         close(sockfd);
         exit(1);
     }
