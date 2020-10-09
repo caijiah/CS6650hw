@@ -8,6 +8,7 @@
 #include <string.h>
 #include <iostream>
 #include <memory>
+#include <arpa/inet.h>
 
 RobotInfo::RobotInfo(Order order, unsigned int engi_id, int exper_id) : order(order) {
     this->order = order;

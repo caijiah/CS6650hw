@@ -7,6 +7,8 @@
 #include "Order.h"
 #include "string.h"
 
+#include <arpa/inet.h>
+
 Order::Order(unsigned int c_id, unsigned int order_n, unsigned int robot_tp) {
     customer_id = c_id;
     order_number = order_n;
