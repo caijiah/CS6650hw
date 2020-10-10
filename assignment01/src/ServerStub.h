@@ -22,6 +22,8 @@ public:
     ~ServerStub();
     std::unique_ptr<Order> ReceiveOrder();
     void ShipRobot(RobotInfo robot_info);
+    void sendErrorMsg(char* msg);
+    void disconnect();
 };
 
 #endif /* ServerStub_h */

@@ -19,7 +19,7 @@ std::unique_ptr<RobotInfo> ClientStub::order(std::unique_ptr<Order> order) {
     char * marshalled_order = order->marshal();
     
     // The byte stream is then sent through a socket connection to the server.
-    client_socket.send_msg(marshalled_order, sizeof(sizeof(int) * 3));
+    client_socket.send_msg(marshalled_order, sizeof(int) * 3);
     delete marshalled_order;
     // Next, the function should wait for a server response.
     size_t buff_size = sizeof(int) * 5;

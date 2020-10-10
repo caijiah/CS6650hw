@@ -35,6 +35,7 @@ void make_orders(
 ) {
 	// each customer takes # orders
 	for (unsigned int i = 0; i < num_orders; i++) {
+	  cout << robot_type << endl;
         unique_ptr<Order> order = unique_ptr<Order>(new Order(customer_id, i, robot_type));
 		auto start = chrono::high_resolution_clock::now();
 		cli_stub->order(move(order));
@@ -64,9 +65,10 @@ int main(int argc, char *argv[]) {
 
 	// create the customer threads as many as customer number:
 	thread customer_threads[num_customers];
-	
 	auto main_start = chrono::high_resolution_clock::now();
 	for (unsigned int i = 0; i < num_customers; i++) {
+	std::cout << "rob_type: " << robot_type << endl;
+
 		unique_ptr<ClientStub> cli_stub = unique_ptr<ClientStub>(new ClientStub(ip_addr, port_num));
 		customer_threads[i] = thread(make_orders, move(cli_stub), i, num_orders, robot_type);
 	}

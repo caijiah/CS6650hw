@@ -8,6 +8,8 @@
 #include <map>
 #include <chrono>
 #include <condition_variable>
+#include <string>
+#include <cstring>
 
 using namespace std;
 
@@ -48,11 +50,16 @@ void process_orders(
         }
         
         int expert_id = -1;
+        cout << "bool:" << order->need_an_expert() << endl;
         if (order->need_an_expert()) {
+	  cout << "need expert" << endl;
             if (experts_pool.empty()) {
-                cerr << "There's no experts for your order now. "
-                << "Please contact us." << endl;
-                exit(1);
+	        string msg = "There's no experts for your special order. Please try later.";
+                char* cstr = new char[msg.length() + 1];
+                strcpy(cstr, msg.c_str());
+		ser_stub->sendErrorMsg(cstr);
+                cerr << "Users attempted to place special order but failed. Please add some experts!" << endl;
+                ser_stub->disconnect();
             }
             // lock, since we push reqs to the shared queue
             que_mtx.lock();
@@ -108,7 +115,7 @@ int main(int argc, char *argv[]) {
     int experts_num = string_to_int(argv[2]);
 
     int engineer_id = 0;
-
+    cout << experts_num << endl;
     for (int i = 0; i < experts_num; i++) {
         experts_pool.push_back(thread(expert_process_orders, engineer_id));
         engineer_id++;

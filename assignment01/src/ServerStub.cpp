@@ -45,3 +45,12 @@ void ServerStub::ShipRobot(RobotInfo robot_info) {
     send(ser_sock, marshalled_robot_info, sizeof(int) * 5, 0);
     delete marshalled_robot_info;
 }
+
+void ServerStub::sendErrorMsg(char* msg) {
+    send(ser_sock, msg, (int) strlen(msg), 400);
+    delete msg;
+}
+
+void ServerStub::disconnect() {
+    close(ser_sock);
+}
