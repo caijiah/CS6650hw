@@ -52,10 +52,10 @@ void process_orders(
         int expert_id = -1;
         if (order->need_an_expert()) {
             if (experts_pool.empty()) {
-	        string msg = "There's no experts for your special order. Please try later.";
+	            string msg = "There's no experts for your special order. Please try later.";
                 char* cstr = new char[msg.length() + 1];
                 strcpy(cstr, msg.c_str());
-		ser_stub->sendErrorMsg(cstr);
+		        ser_stub->sendErrorMsg(cstr);
                 cerr << "Users attempted to place special order but failed. Please add some experts!" << endl;
                 ser_stub->disconnect();
             }
