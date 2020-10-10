@@ -50,9 +50,7 @@ void process_orders(
         }
         
         int expert_id = -1;
-        cout << "bool:" << order->need_an_expert() << endl;
         if (order->need_an_expert()) {
-	  cout << "need expert" << endl;
             if (experts_pool.empty()) {
 	        string msg = "There's no experts for your special order. Please try later.";
                 char* cstr = new char[msg.length() + 1];
@@ -115,7 +113,6 @@ int main(int argc, char *argv[]) {
     int experts_num = string_to_int(argv[2]);
 
     int engineer_id = 0;
-    cout << experts_num << endl;
     for (int i = 0; i < experts_num; i++) {
         experts_pool.push_back(thread(expert_process_orders, engineer_id));
         engineer_id++;
