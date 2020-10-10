@@ -82,7 +82,7 @@ void process_orders(
     }
 }
 
-void expert_process_orders(
+void assign_expert_orders(
                            unsigned int expert_id
                            ) {
     while (true) {
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
 
     int engineer_id = 0;
     for (int i = 0; i < experts_num; i++) {
-        experts_pool.push_back(thread(expert_process_orders, engineer_id));
+        experts_pool.push_back(thread(assign_expert_orders, engineer_id));
         engineer_id++;
     }
     
