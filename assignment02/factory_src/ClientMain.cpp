@@ -47,6 +47,15 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
+	if (request_type == 3) {
+		auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
+		std::thread client_thread(&ClientThreadClass::ThreadBody, client_cls,
+				ip, port, 0, num_orders, request_type);
+		
+		
+		client_thread.join();
+	}
+
 
 	timer.Start();
 	for (int i = 0; i < num_customers; i++) {

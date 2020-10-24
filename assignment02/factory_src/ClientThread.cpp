@@ -8,25 +8,70 @@ ClientThreadClass::ClientThreadClass() {}
 void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders, int type) {
 	customer_id = id;
 	num_orders = orders;
-	robot_type = type;
+	req_type = type;
 	if (!stub.Init(ip, port)) {
 		std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
 		return;
 	}
-	for (int i = 0; i < num_orders; i++) {
+	switch (req_type)
+	{
+	case 1: // as before 
+		for (int i = 0; i < num_orders; i++) {
 		CustomerRequest crq;
 		RobotInfo robot;
-		crq.SetRequest(customer_id, i, robot_type);
+		crq.SetRequest(customer_id, i, req_type);
 
 		timer.Start();
 		robot = stub.Order(crq);
 		timer.EndAndMerge();
-
+		
 		if (!robot.IsValid()) {
 			std::cout << "Invalid robot " << customer_id << std::endl;
 			break;	
-		} 
+			} 
+		}
+		break;
+	case 2:
+		for (int i = 0; i < num_orders; i++) {
+		CustomerRequest crq;
+		CustomerRecord record;
+		crq.SetRequest(customer_id, i, req_type);
+
+		timer.Start();
+		record = stub.ReadRecord(crq);
+		timer.EndAndMerge();
+		
+		if (!record.IsValid()) {
+			std::cout << "Invalid record " << customer_id << std::endl;
+			break;	
+			} else {
+			std::cout << "Found record: c_id " << record.GetCustomerId() << ", last order :";
+			std::cout << record.GetLastOrder() << std::endl;
+			}
+		}
+		break;
+	case 3:
+		for (int i = 0; i < num_orders; i++) {
+			CustomerRequest crq;
+			CustomerRecord record;
+			crq.SetRequest(customer_id, -1, 2);
+
+			timer.Start();
+			record = stub.ReadRecord(crq);
+			timer.EndAndMerge();
+			if (!record.IsValid()) {
+				std::cout << "Invalid record " << customer_id << std::endl;
+				break;	
+				} else {
+				std::cout << record.GetCustomerId() << "\t"; 
+				std::cout << record.GetLastOrder() << std::endl;
+				}
+		break;
+		}
+	default:
+		break;
 	}
+	
 }
 
 ClientTimer ClientThreadClass::GetTimer() {

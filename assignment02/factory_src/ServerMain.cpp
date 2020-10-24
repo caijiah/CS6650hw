@@ -10,7 +10,7 @@
 int main(int argc, char *argv[]) {
 	int port;
 	int engineer_cnt = 0;
-	int num_experts;
+	int num_admin;
 	ServerSocket socket;
 	RobotFactory factory;
 	std::unique_ptr<ServerSocket> new_socket;
@@ -23,9 +23,12 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 	port = atoi(argv[1]);
-	num_experts = atoi(argv[2]);
+	num_admin = atoi(argv[2]);
+	if (num_admin != 1) {
+		std::cout << "Invalid experts number. It has to be 1." << std::endl;
+	}
 
-	for (int i = 0; i < num_experts; i++) {
+	for (int i = 0; i < num_admin; i++) {
 		std::thread expert_thread(&RobotFactory::AdminThread, &factory, engineer_cnt++);
 		thread_vector.push_back(std::move(expert_thread));
 	}

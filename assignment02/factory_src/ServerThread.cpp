@@ -31,6 +31,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 	int request_type;
 	CustomerRequest crq;
 	RobotInfo robot;
+	CustomerRecord crd;
 
 	ServerStub stub;
 
@@ -43,18 +44,27 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 		}
 		request_type = crq.GetRequestType();
 		switch (request_type) {
-			case 0:
-				robot = CreateRobotAndAdminRequest(crq, engineer_id);
-				break;
 			case 1:
-				// read
+				robot = CreateRobotAndAdminRequest(crq, engineer_id);
+				stub.ShipRobot(robot);
+				break;
+			case 2:
+				int cid = crq.GetCustomerId();
+				// defaul
+				crd.SetCustomerId(cid);
+				crd.SetLastOrder(-1);
+				crd_lock.lock();
+				// if find
+				if (customer_record.find(cid) != customer_record.end()) {
+					crd.SetLastOrder(customer_record[cid]);
+				}
+				stub.ReturnRecord(crd);
 				break;
 			default:
-				std::cout << "Undefined robot type: "
+				std::cout << "Undefined request type: "
 					<< request_type << std::endl;
-
+				
 		}
-		stub.ShipRobot(robot);
 	}
 }
 
