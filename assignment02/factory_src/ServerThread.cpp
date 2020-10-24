@@ -29,6 +29,7 @@ RobotInfo RobotFactory::CreateRobotAndAdminRequest(CustomerRequest crq, int engi
 void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) {
 	int engineer_id = id;
 	int request_type;
+	int cid;
 	CustomerRequest crq;
 	RobotInfo robot;
 	CustomerRecord crd;
@@ -40,7 +41,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 	while (true) {
 		crq = stub.ReceiveRequest();
 		if (!crq.IsValid()) {
-			break;	
+			break;
 		}
 		request_type = crq.GetRequestType();
 		switch (request_type) {
@@ -49,7 +50,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 				stub.ShipRobot(robot);
 				break;
 			case 2:
-				int cid = crq.GetCustomerId();
+				cid = crq.GetCustomerId();
 				// defaul
 				crd.SetCustomerId(cid);
 				crd.SetLastOrder(-1);
@@ -58,12 +59,13 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 				if (customer_record.find(cid) != customer_record.end()) {
 					crd.SetLastOrder(customer_record[cid]);
 				}
+				crd_lock.unlock();
 				stub.ReturnRecord(crd);
 				break;
 			default:
 				std::cout << "Undefined request type: "
 					<< request_type << std::endl;
-				
+
 		}
 	}
 }
@@ -88,7 +90,7 @@ void RobotFactory::AdminThread(int id) {
 		int order_num = robot.GetOrderNumber();
 		crd_lock.lock();
 		if (customer_record.find(cid) == customer_record.end()) {
-			customer_record.insert(cid, order_num);
+			customer_record.insert({cid, order_num});
 		} else {
 			customer_record[cid] = order_num;
 		}
@@ -103,6 +105,6 @@ void RobotFactory::AdminThread(int id) {
 		smr_log_lock.unlock();
 
 		req->robot.SetAdminId(id);
-		req->prom.set_value(req->robot);	
+		req->prom.set_value(req->robot);
 	}
 }

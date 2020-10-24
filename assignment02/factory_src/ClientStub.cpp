@@ -3,7 +3,7 @@
 ClientStub::ClientStub() {}
 
 int ClientStub::Init(std::string ip, int port) {
-	return socket.Init(ip, port);	
+	return socket.Init(ip, port);
 }
 
 RobotInfo ClientStub::Order(CustomerRequest crq) {
@@ -16,15 +16,14 @@ RobotInfo ClientStub::Order(CustomerRequest crq) {
 		size = info.Size();
 		if (socket.Recv(buffer, size, 0)) {
 			info.Unmarshal(buffer);
-		} 
+		}
 	}
 	return info;
 }
 
-
 CustomerRecord ClientStub::ReadRecord(CustomerRequest crq) {
-	CustomerRecod cus_rec;
-	char buffer[32]
+	CustomerRecord cus_rec;
+	char buffer[32];
 	int size;
 	crq.Marshal(buffer);
 	size = crq.Size();
@@ -32,7 +31,7 @@ CustomerRecord ClientStub::ReadRecord(CustomerRequest crq) {
 		size = cus_rec.Size();
 		if (socket.Recv(buffer, size, 0)) {
 			cus_rec.Unmarshal(buffer);
-		} 
+		}
 	}
 	return cus_rec;
 }

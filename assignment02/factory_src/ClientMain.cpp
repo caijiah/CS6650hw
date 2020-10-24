@@ -1,8 +1,8 @@
 #include <array>
-#include <iostream> 
-#include <iomanip> 
-#include <thread> 
-#include <vector> 
+#include <iostream>
+#include <iomanip>
+#include <thread>
+#include <vector>
 #include <algorithm> // for std::find
 #include <iterator> // for std::begin, std::end
 
@@ -15,12 +15,12 @@ int main(int argc, char *argv[]) {
 	int port;
 	int num_customers;
 	int num_orders;
-	int request_type; // 1, 2, 3 
+	int request_type; // 1, 2, 3
 	ClientTimer timer;
 
 	std::vector<std::shared_ptr<ClientThreadClass>> client_vector;
 	std::vector<std::thread> thread_vector;
-	
+
 	if (argc < 6) {
 		std::cout << "not enough arguments" << std::endl;
 		std::cout << argv[0] << "[ip] [port #] [# customers] ";
@@ -51,14 +51,13 @@ int main(int argc, char *argv[]) {
 		auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
 		std::thread client_thread(&ClientThreadClass::ThreadBody, client_cls,
 				ip, port, 0, num_orders, request_type);
-		
-		
 		client_thread.join();
+		return 1;
 	}
 
 
 	timer.Start();
-	for (int i = 0; i < num_customers; i++) {
+	for (int i = 1; i <= num_customers; i++) {
 		auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
 		std::thread client_thread(&ClientThreadClass::ThreadBody, client_cls,
 				ip, port, i, num_orders, request_type);
@@ -72,7 +71,7 @@ int main(int argc, char *argv[]) {
 	timer.End();
 
 	for (auto& cls : client_vector) {
-		timer.Merge(cls->GetTimer());	
+		timer.Merge(cls->GetTimer());
 	}
 	timer.PrintStats();
 

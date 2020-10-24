@@ -144,7 +144,7 @@ void RobotInfo::CopyRequest(CustomerRequest request) {
 	request_type = request.GetRequestType();
 }
 void RobotInfo::SetEngineerId(int id) { engineer_id = id; }
-void RobotInfo::SetExpertId(int id) { expert_id = id; }
+void RobotInfo::SetAdminId(int id) { admin_id = id; }
 
 int RobotInfo::GetCustomerId() { return customer_id; }
 int RobotInfo::GetOrderNumber() { return order_number; }
@@ -218,7 +218,7 @@ CustomerRecord::CustomerRecord() {
 	customer_id = -1;
 	last_order = -1;
 }
-	
+
 void CustomerRecord::SetRecord(int cid, int lo) {
 	customer_id = cid;
 	last_order = lo;
@@ -258,7 +258,7 @@ void CustomerRecord::Unmarshal(char *buffer) {
 }
 
 bool CustomerRecord::IsValid() {
-	return (customer_id != -1);	
+	return (customer_id != -1);
 }
 
 void CustomerRecord::Print() {
