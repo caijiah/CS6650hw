@@ -8,22 +8,6 @@ int FactoryStub::Init(std::string ip, int port) {
 	return socket.Init(ip, port);
 }
 
-
-// RobotInfo ClientStub::Order(CustomerRequest crq) {
-// 	RobotInfo info;
-// 	char buffer[32];
-// 	int size;
-// 	crq.Marshal(buffer);
-// 	size = crq.Size();
-// 	if (socket.Send(buffer, size, 0)) {
-// 		size = info.Size();
-// 		if (socket.Recv(buffer, size, 0)) {
-// 			info.Unmarshal(buffer);
-// 		}
-// 	}
-// 	return info;
-// }
-
 void FactoryStub::SendIdentifyMessage(IdentifyMessage identify_message) {
 	int buff_size = sizeof(int);
 	char buffer[buff_size];
