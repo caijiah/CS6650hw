@@ -37,14 +37,14 @@ public:
 
 class CustomerRequest {
 private:
-	// For robot order: customer id who placed order. 
+	// For robot order: customer id who placed order.
 	// For read request: customer id to read from map.
 	int customer_id;
 	// # of orders issued by this customer so far.
     // Record-read request does not count as an order.
 	// Set to -1 for read requests.
 	int order_number;
-	// Either 1 - regular robot order request, or 
+	// Either 1 - regular robot order request, or
 	// 		  2 - customer record read request
 	int request_type;
 
@@ -137,8 +137,8 @@ public:
 
 class MapOp {
 private:
-	int opcode; // operation code: 1 - update value 
-	int arg1; // customer_id to apply the operation 
+	int opcode; // operation code: 1 - update value
+	int arg1; // customer_id to apply the operation
 	int arg2; // parameter for the operation
 public:
 	MapOp();
@@ -162,7 +162,7 @@ public:
 	void Unmarshal(char * buffer);
 
 	bool IsValid();
-	
+
 	void Print();
 };
 

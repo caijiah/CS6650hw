@@ -20,15 +20,15 @@ struct AdminRequest {
 
 struct AdminConfig {
 	// the last index of the smr_log that has data
-	int last_index = -1;
+	int last_index;
 	// the last index of the smr_log where the
 	// MapOp of the log entry is committed and
 	// applied to the customer_record
-	int committed_index = -1;
+	int committed_index;
 	// the production factory id (server id).
 	// initially set to -1.
-	int primary_id = - 1;
-	// the id of the factory. This is assigned via 
+	int primary_id;
+	// the id of the factory. This is assigned via
 	// the command line arguments.
 	int factory_id;
 
@@ -50,7 +50,7 @@ private:
 	std::vector<MapOp> smr_log;
 
 	AdminConfig admin_config;
-	std::map<int, FactoryStub> peer_connections;
+	std::map<int, std::unique_ptr<FactoryStub>> peer_connections;
 	bool peer_connected = false;
 
 	RobotInfo CreateRobotAndAdminRequest(CustomerRequest crq, int engineer_id);
@@ -63,4 +63,3 @@ public:
 };
 
 #endif // end of #ifndef __SERVERTHREAD_H__
-

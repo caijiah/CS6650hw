@@ -16,14 +16,14 @@ int main(int argc, char *argv[]) {
 	// int num_admin = NUM_FACTORY_ADMIN;
 	int num_peers;
 	int unique_ID;
-	std::map<int, Peer> peers; 
+	std::map<int, Peer> peers;
 
 	ServerSocket socket;
 	RobotFactory factory;
 	std::unique_ptr<ServerSocket> new_socket;
 	std::vector<std::thread> thread_vector;
 
-	
+
 	if (argc < 4) {
 		std::cout << "not enough arguments" << std::endl;
 		std::cout << argv[0] << "[port #] [# nuique ID] [# peers]" << std::endl;
@@ -50,12 +50,17 @@ int main(int argc, char *argv[]) {
 
 	AdminConfig admin_config;
 	admin_config.unique_id = unique_ID;
-	admin_config.last_index = 0;
-	admin_config.committed_index = 0;
+	admin_config.last_index = -1;
+	admin_config.committed_index = -1;
+	admin_config.primary_id = -1;
 	admin_config.peers = peers;
+
+	std::cout << "break after amdin config" << std::endl;
+
 
 	factory.SetAdminConfig(admin_config);
 	std::thread admin_thread(&RobotFactory::AdminThread, &factory, engineer_cnt++);
+	std::cout << "break after amdin thread" << std::endl;
 	thread_vector.push_back(std::move(admin_thread));
 
 	if (!socket.Init(port)) {
@@ -64,8 +69,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	while ((new_socket = socket.Accept())) {
-		std::thread engineer_thread(&RobotFactory::EngineerThread, &factory, 
+		std::cout << "break before engineer_thread" << std::endl;
+		std::thread engineer_thread(&RobotFactory::EngineerThread, &factory,
 				std::move(new_socket), engineer_cnt++);
+			std::cout << "break after engineer_thread" << std::endl;
 		thread_vector.push_back(std::move(engineer_thread));
 	}
 	return 0;

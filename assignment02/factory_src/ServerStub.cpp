@@ -1,3 +1,7 @@
+#include <cstring>
+#include <iostream>
+#include <arpa/inet.h>
+
 #include "ServerStub.h"
 
 ServerStub::ServerStub() {}
@@ -46,3 +50,9 @@ ReplicationRequest ServerStub::ReceiveReplicationRequest() {
 	return replication_request;
 }
 
+int ServerStub::ReturnReplicaResponse(int last_index) {
+	char buffer[sizeof(int)];
+	int net_last_index = htonl(last_index);
+	memcpy(buffer, &net_last_index, sizeof(net_last_index));
+	return socket->Send(buffer, sizeof(int), 0);
+}

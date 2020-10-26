@@ -17,6 +17,7 @@ public:
 	int ReturnRecord(CustomerRecord cus_rec);
 	IdentifyMessage ReceiveIdentifyMessage();
 	ReplicationRequest ReceiveReplicationRequest();
+	int ReturnReplicaResponse(int last_index);
 };
 
 
