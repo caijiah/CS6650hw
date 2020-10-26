@@ -33,6 +33,7 @@ void FactoryStub::SendIdentifyMessage(IdentifyMessage identify_message) {
 }
 
 int FactoryStub::SendReplicationRequest(ReplicationRequest replica_req) {
+	int net_res;
 	int buff_size = sizeof(int) * 6;
 	char buffer[buff_size];
 	replica_req.Marshal(buffer);
@@ -40,9 +41,8 @@ int FactoryStub::SendReplicationRequest(ReplicationRequest replica_req) {
 	if (socket.Send(buffer, size, 0)) {
 		size = sizeof(int);
 		if (socket.Recv(buffer, size, 0)) {
-			int net_res;
 			memcpy(&net_res, buffer, sizeof(net_res));
-			return ntohl(net_res);
 		}
 	}
+	return ntohl(net_res);
 }

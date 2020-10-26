@@ -11,6 +11,7 @@
 #include "Messages.h"
 #include "ServerSocket.h"
 #include "FactoryStub.h"
+#include "Peer.h"
 
 struct AdminRequest {
 	CustomerRecord customer_record;
@@ -36,12 +37,6 @@ struct AdminConfig {
 	std::map<int, Peer> peers;
 };
 
-struct Peer {
-	int peer_id;
-	std::string peer_ip;
-	int peer_port;
-};
-
 class RobotFactory {
 private:
 	std::queue<std::unique_ptr<AdminRequest>> arq;
@@ -61,6 +56,7 @@ private:
 	RobotInfo CreateRobotAndAdminRequest(CustomerRequest crq, int engineer_id);
 	// RobotInfo CreateSpecialRobot(RobotOrder order, int engineer_id);
 public:
+	void updateCusRecord();
 	void SetAdminConfig(AdminConfig ad_config);
 	void EngineerThread(std::unique_ptr<ServerSocket> socket, int id);
 	void AdminThread(int id);

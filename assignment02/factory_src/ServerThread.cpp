@@ -6,7 +6,7 @@
 #include "ServerThread.h"
 #include "ServerStub.h"
 #include "FactoryStub.h"
-#include "Message.h"
+#include "Messages.h"
 
 void RobotFactory::SetAdminConfig(AdminConfig ad_config) {
 	admin_config = ad_config;
@@ -54,20 +54,24 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
 	while (true) {
 		identify_message = server_stub.ReceiveIdentifyMessage();
-		indentify_flag = identify_message.GetIdentifyFlag();
+		int indentify_flag = identify_message.GetIdentifyFlag();
 		switch (indentify_flag) {
 			case CLIENT:
+			{
 				crq = server_stub.ReceiveRequest();
 				if (!crq.IsValid()) {
 					break;
 				}
 				request_type = crq.GetRequestType();
 				switch (request_type) {
-					case 1:
+					case 1: 
+					{
 						robot = CreateRobotAndAdminRequest(crq, engineer_id);
 						server_stub.ShipRobot(robot);
 						break;
+					}
 					case 2:
+					{
 						cid = crq.GetCustomerId();
 						// defaul
 						crd.SetCustomerId(cid);
@@ -80,12 +84,15 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 						crd_lock.unlock();
 						server_stub.ReturnRecord(crd);
 						break;
+					}
 					default:
 						std::cout << "Undefined request type: "
 							<< request_type << std::endl;
 				}
 				break;
+			}
 			case PFA:
+			{
 				ReplicationRequest replica_req;
 				int primary_factory = replica_req.GetFactoryId();
 				if (admin_config.primary_id != primary_factory) {
@@ -100,20 +107,28 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 				admin_config.last_index = replica_last_index;
 				// Applies MapOp in the req.committed index of smr log to the customer record and
 				// update self.committed index; and
-				int replica_commited_index = replica_commited_index;
+				int replica_commited_index = replica_req.GetCommittedIndex();
 				MapOp op_replica_commited = smr_log[replica_commited_index];
-				int commited_op_cid = last_op.GetArg1();
-				int commited_op_order_num = last_op.GetArg2();
+				int commited_op_cid = op_replica_commited.GetArg1();
+				int commited_op_order_num = op_replica_commited.GetArg2();
 				crd_lock.lock();
+				if (customer_record.find(commited_op_cid) == customer_record.end()) {
+					customer_record.insert({commited_op_cid, commited_op_order_num});
+				} else {
+					customer_record[commited_op_cid] = commited_op_order_num;
+				}
+				crd_lock.unlock();
+				admin_config.committed_index = replica_commited_index;
 				break;
+			}
 			default:
 				std::cout << "Undefined identity type: " << indentify_flag << std::endl;
 		}
 	}
 }
 
-void updateCusRecord() {
-	MapOp last_op = MapOp[admin_config.last_index];
+void RobotFactory::updateCusRecord() {
+	MapOp last_op = smr_log[admin_config.last_index];
 	int last_op_cid = last_op.GetArg1();
 	int last_op_order_num = last_op.GetArg2();
 	crd_lock.lock();
@@ -148,8 +163,8 @@ void RobotFactory::AdminThread(int id) {
 			for ( it = admin_config.peers.begin(); it != admin_config.peers.end(); it++ ) {
 				Peer peer = it->second;
 				FactoryStub factory_stub;
-				factory_stub.Init(peer.peer_ip, peer.peer_port);
-				peer_connections.insert({peer.peer_id, factory_stub});
+				factory_stub.Init(peer.GetPeerIP(), peer.GetPeerPort());
+				peer_connections.insert({peer.GetPeerID(), factory_stub});
 			  }
 			peer_connected = true;
 		}
@@ -192,5 +207,5 @@ void RobotFactory::AdminThread(int id) {
 		updateCusRecord();
 		// finish
 		req->admin_id_pro.set_value(id);
-	}
 }
+

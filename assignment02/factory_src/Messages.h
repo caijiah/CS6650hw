@@ -208,7 +208,7 @@ private:
 public:
 	IdentifyMessage();
 	int Size();
-	int SetIdentifyFlag(int ident);
+	void SetIdentifyFlag(int ident);
 	int GetIdentifyFlag();
 
 	bool IsValid();

@@ -361,7 +361,7 @@ ReplicationRequest::ReplicationRequest() {
 
 void ReplicationRequest::SetRequest(int fid, int commit_index, int last_inde, MapOp mo) {
 	factory_id = fid;
-	commit_index = commit_index;
+	committed_index = commit_index;
 	last_index = last_inde;
 	map_op = mo;
 }
@@ -410,7 +410,7 @@ void ReplicationRequest::Marshal(char *buffer) {
 	memcpy(buffer + offset, &net_last_index, sizeof(net_last_index));
 	offset += sizeof(net_last_index);
 
-	char *map_buff;
+	char map_buff[map_op.Size()];
 	map_op.Marshal(map_buff);
 	// check if it works
 	memcpy(buffer + offset, &map_buff, map_op.Size());
@@ -434,7 +434,7 @@ void ReplicationRequest::Unmarshal(char *buffer) {
 	committed_index = ntohl(net_committed_index);
 	last_index = ntohl(net_last_index);
 
-	char *map_buff;
+	char map_buff[map_op.Size()];
 	memcpy(&map_buff, buffer + offset, map_op.Size());
 	map_op.Unmarshal(map_buff);
 }
@@ -459,7 +459,7 @@ int IdentifyMessage::Size() {
 	return sizeof(identify);
 }
 
-int IdentifyMessage::SetIdentifyFlag(int ident) {
+void IdentifyMessage::SetIdentifyFlag(int ident) {
 	identify = ident;
 }
 

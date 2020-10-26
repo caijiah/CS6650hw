@@ -6,13 +6,14 @@
 
 #include "ServerSocket.h"
 #include "ServerThread.h"
+#include "Peer.h"
 
 #define NUM_FACTORY_ADMIN 1
 
 int main(int argc, char *argv[]) {
 	int port;
 	int engineer_cnt = 0;
-	int num_admin = NUM_FACTORY_ADMIN;
+	// int num_admin = NUM_FACTORY_ADMIN;
 	int num_peers;
 	int unique_ID;
 	std::map<int, Peer> peers; 
@@ -41,10 +42,10 @@ int main(int argc, char *argv[]) {
 	unique_ID = atoi(argv[2]);
 	for (int i = 0; i < num_peers; i++) {
 		Peer new_peer;
-		new_peer.peer_id = atoi(argv[4 + i*3]);
-		new_peer.peer_ip = argv[4 + i*3 + 1];
-		new_peer.peer_port = atoi(argv[4 + i*3 + 2]);
-		peers.insert({new_peer.peer_id, new_peer});
+		new_peer.SetPeerID(atoi(argv[4 + i*3]));
+		new_peer.SetPeerIP(argv[4 + i*3 + 1]);
+		new_peer.SetPeerPort(atoi(argv[4 + i*3 + 2]));
+		peers.insert({new_peer.GetPeerID(), new_peer});
 	}
 
 	AdminConfig admin_config;
