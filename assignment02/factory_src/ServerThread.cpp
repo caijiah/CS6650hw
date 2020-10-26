@@ -17,6 +17,7 @@ RobotInfo RobotFactory::CreateRobotAndAdminRequest(CustomerRequest crq, int engi
 	RobotInfo robot;
 	robot.CopyRequest(crq);
 	robot.SetEngineerId(engineer_id);
+	std::cout << "customer_id" << robot.GetCustomerId() << std::endl;
 	int admin_id = -1;
 	CustomerRecord cus_record;
 	cus_record.SetRecord(robot.GetCustomerId(), robot.GetOrderNumber());
