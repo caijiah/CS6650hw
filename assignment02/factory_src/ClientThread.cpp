@@ -43,6 +43,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 		IdentifyMessage identify_message;
 		identify_message.SetIdentifyFlag(CLIENT);
 		timer.Start();
+		stub.SendIdentifyMessage(identify_message);
 		record = stub.ReadRecord(crq);
 		timer.EndAndMerge();
 
@@ -64,6 +65,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 			IdentifyMessage identify_message;
 			identify_message.SetIdentifyFlag(CLIENT);
 			timer.Start();
+			stub.SendIdentifyMessage(identify_message);
 			record = stub.ReadRecord(crq);
 			timer.EndAndMerge();
 			if (record.IsValid()) {

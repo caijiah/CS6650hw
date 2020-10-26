@@ -57,7 +57,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 		int indentify_flag;
 		indentify_flag = identify_message.GetIdentifyFlag();
 		if (indentify_flag == -1) {
-			continue;
+			break;
 		}
 		std::cout << "receive a indentify_flag" << std::endl;
 		switch (indentify_flag) {
@@ -73,7 +73,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 					{
 						// std::cout << "before create" << std::endl;
 						robot = CreateRobotAndAdminRequest(crq, engineer_id);
-						// std::cout << "Got a robot" << std::endl;
+						std::cout << "Got a robot" << robot.GetCustomerId() << std::endl;
 						server_stub.ShipRobot(robot);
 						break;
 					}
@@ -81,6 +81,8 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 					{
 						cid = crq.GetCustomerId();
 						// defaul
+						std::cout << "Got read request" << cid << std::endl;
+
 						crd.SetCustomerId(cid);
 						crd.SetLastOrder(-1);
 						crd_lock.lock();
@@ -112,30 +114,36 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 				std::cout << replica_mop.GetOpcode() << std::endl;
 				std::cout << replica_mop.GetArg1() << std::endl;
 				std::cout << replica_mop.GetArg2() << std::endl;
+				std::cout << "commited order number " <<  replica_mop.GetArg2() << std::endl;
 
 				smr_log_lock.lock();
 				// std::cout << "last index" << replica_last_index << std::endl;
 
 				smr_log.insert((smr_log.begin() + replica_last_index), replica_mop);
+				std::cout << "check order number " << smr_log[replica_last_index].GetArg2() << std::endl;
 				// std::cout << "after set smr_log" << std::endl;
 				smr_log_lock.unlock();
 				admin_config.last_index = replica_last_index;
 				// Applies MapOp in the req.committed index of smr log to the customer record and
 				// update self.committed index; and
 				int replica_commited_index = replica_req.GetCommittedIndex();
-				// std::cout << "commited index" << replica_commited_index << std::endl;
-
-				MapOp op_replica_commited = smr_log[replica_commited_index];
-				int commited_op_cid = op_replica_commited.GetArg1();
-				int commited_op_order_num = op_replica_commited.GetArg2();
-				crd_lock.lock();
-				if (customer_record.find(commited_op_cid) == customer_record.end()) {
-					customer_record.insert({commited_op_cid, commited_op_order_num});
-				} else {
-					customer_record[commited_op_cid] = commited_op_order_num;
+				std::cout << "commited index" << replica_commited_index << std::endl;
+				if (replica_commited_index != -1) {
+					smr_log_lock.lock();
+					MapOp op_replica_commited = smr_log[replica_commited_index];
+					smr_log_lock.unlock();
+					int commited_op_cid = op_replica_commited.GetArg1();
+					int commited_op_order_num = op_replica_commited.GetArg2();
+					std::cout << "commited order number " <<  commited_op_order_num << std::endl;
+					crd_lock.lock();
+					if (customer_record.find(commited_op_cid) == customer_record.end()) {
+						customer_record.insert({commited_op_cid, commited_op_order_num});
+					} else {
+						customer_record[commited_op_cid] = commited_op_order_num;
+					}
+					crd_lock.unlock();
+					admin_config.committed_index = replica_commited_index;
 				}
-				crd_lock.unlock();
-				admin_config.committed_index = replica_commited_index;
 				server_stub.ReturnReplicaResponse(admin_config.last_index);
 				break;
 			}
@@ -220,7 +228,8 @@ void RobotFactory::AdminThread(int id) {
 		IdentifyMessage identify_message;
 		identify_message.SetIdentifyFlag(PFA);
 		ReplicationRequest replica_req;
-		replica_req.SetRequest(admin_config.factory_id, admin_config.unique_id, admin_config.last_index, op);
+		replica_req.SetRequest(admin_config.factory_id, admin_config.committed_index
+			                   , admin_config.last_index, op);
 		// send idetnfity message
 		std::map<int, std::unique_ptr<FactoryStub>>::iterator it;
 		for (it = peer_connections.begin(); it != peer_connections.end(); it++ ) {
