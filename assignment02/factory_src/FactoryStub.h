@@ -3,12 +3,12 @@
 
 #include <string>
 
-#include "ClientSocket.h"
+#include "FactorySocket.h"
 #include "Messages.h"
 
 class FactoryStub {
 private:
-	ClientSocket socket;
+	FactorySocket socket;
 public:
 	FactoryStub();
 	int Init(std::string ip, int port);

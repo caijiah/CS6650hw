@@ -391,8 +391,12 @@ int ReplicationRequest::GetLastIndex() {
 	return last_index;
 }
 
+MapOp ReplicationRequest::GetMapOp() {
+	return map_op;
+}
+
 int ReplicationRequest::Size() {
-	return sizeof(factory_id) + sizeof(committed_index) + 
+	return sizeof(factory_id) + sizeof(committed_index) +
 	       sizeof(last_index) + map_op.Size();
 }
 

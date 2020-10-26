@@ -1,4 +1,5 @@
 #include <cstring>
+#include <arpa/inet.h>
 
 #include "FactoryStub.h"
 
@@ -23,7 +24,7 @@ int FactoryStub::SendReplicationRequest(ReplicationRequest replica_req) {
 	replica_req.Marshal(buffer);
 	int size = replica_req.Size();
 	if (socket.Send(buffer, size, 0)) {
-		size = sizeof(int);
+		size = sizeof(net_res);
 		if (socket.Recv(buffer, size, 0)) {
 			memcpy(&net_res, buffer, sizeof(net_res));
 		}
