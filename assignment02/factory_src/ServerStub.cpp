@@ -45,3 +45,4 @@ ReplicationRequest ServerStub::ReceiveReplicationRequest() {
 	}
 	return replication_request;
 }
+

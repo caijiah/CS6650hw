@@ -19,4 +19,5 @@ public:
 	ReplicationRequest ReceiveReplicationRequest();
 };
 
+
 #endif // end of #ifndef __SERVER_STUB_H__
