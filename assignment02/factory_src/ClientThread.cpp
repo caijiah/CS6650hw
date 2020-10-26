@@ -20,8 +20,11 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 		CustomerRequest crq;
 		RobotInfo robot;
 		crq.SetRequest(customer_id, i, req_type);
+		IdentifyMessage identify_message;
+		identify_message.SetIdentifyFlag(CLIENT);
 
 		timer.Start();
+		stub.SendIdentifyMessage(identify_message);
 		robot = stub.Order(crq);
 		timer.EndAndMerge();
 

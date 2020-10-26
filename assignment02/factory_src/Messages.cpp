@@ -244,6 +244,7 @@ void CustomerRecord::Marshal(char *buffer) {
 	offset += sizeof(net_customer_id);
 	memcpy(buffer + offset, &net_last_order, sizeof(net_last_order));
 }
+
 void CustomerRecord::Unmarshal(char *buffer) {
 	int net_customer_id;
 	int net_last_order;
@@ -264,4 +265,220 @@ bool CustomerRecord::IsValid() {
 void CustomerRecord::Print() {
 	std::cout << "id " << customer_id << " ";
 	std::cout << "last order " << last_order << " ";
+}
+
+// ------------------- MapOp -------------
+MapOp::MapOp() {
+	opcode = -1;
+	arg1 = -1;
+	arg2 = -2;
+}
+
+void MapOp::SetMapOp(int oc, int a1, int a2) {
+	opcode = oc;
+	arg1 = a1;
+	arg2 = a2;
+}
+
+void MapOp::SetOpcode(int oc) {
+	opcode = oc;
+}
+
+void MapOp::SetArg1(int a1) {
+	arg1 = a1;
+}
+
+void MapOp::SetArg2(int a2) {
+	arg2 = a2;
+}
+
+int MapOp::GetOpcode() {
+	return opcode;
+}
+
+int MapOp::GetArg1() {
+	return arg1;
+}
+
+int MapOp::GetArg2() {
+	return arg2;
+}
+
+int MapOp::Size() {
+	return sizeof(opcode) + sizeof(arg1) + sizeof(arg2);
+}
+
+void MapOp::Marshal(char * buffer) {
+	int net_opcode = htonl(opcode);
+	int net_arg1 = htonl(arg1);
+	int net_arg2 = htonl(arg2);
+
+	int offset = 0;
+
+	memcpy(buffer + offset, &net_opcode, sizeof(net_opcode));
+	offset += sizeof(net_opcode);
+	memcpy(buffer + offset, &net_arg1, sizeof(net_arg1));
+	offset += sizeof(net_arg1);
+	memcpy(buffer + offset, &net_arg2, sizeof(net_arg2));
+}
+
+void MapOp::Unmarshal(char * buffer) {
+	int net_opcode;
+	int net_arg1;
+	int net_arg2;
+
+	int offset = 0;
+
+	memcpy(&net_opcode, buffer + offset, sizeof(net_opcode));
+	offset += sizeof(net_opcode);
+	memcpy(&net_arg1, buffer + offset, sizeof(net_arg1));
+	offset += sizeof(net_arg1);
+	memcpy(&net_arg2, buffer + offset, sizeof(net_arg2));
+
+	opcode = ntohl(net_opcode);
+	arg1 = ntohl(net_arg1);
+	arg2 = ntohl(net_arg2);
+}
+
+bool MapOp::IsValid() {
+	return (opcode != -1);
+}
+
+void MapOp::Print() {
+	std::cout << "opcode " << opcode << " ";
+	std::cout << "arg1 " << arg1 << " ";
+	std::cout << "arg2 " << arg2 << " ";
+}
+
+
+// ----------------- ReplicationRequest ----------------
+ReplicationRequest::ReplicationRequest() {
+	factory_id = -1;
+	committed_index = -1;
+	last_index = -1;
+	map_op = MapOp();
+}
+
+void ReplicationRequest::SetRequest(int fid, int commit_index, int last_inde, MapOp mo) {
+	factory_id = fid;
+	commit_index = commit_index;
+	last_index = last_inde;
+	map_op = mo;
+}
+
+void ReplicationRequest::SetFactoryId(int fid) {
+	factory_id = fid;
+}
+void ReplicationRequest::SetCommittedIndex(int commit_index) {
+	committed_index = commit_index;
+}
+
+void ReplicationRequest::SetLastIndex(int last_inde) {
+	last_index = last_inde;
+}
+
+void ReplicationRequest::SetMapOp(MapOp mo) {
+	map_op = mo;
+}
+
+int ReplicationRequest::GetFactoryId() {
+	return factory_id;
+}
+int ReplicationRequest::GetCommittedIndex() {
+	return committed_index;
+}
+int ReplicationRequest::GetLastIndex() {
+	return last_index;
+}
+
+int ReplicationRequest::Size() {
+	return sizeof(factory_id) + sizeof(committed_index) + 
+	       sizeof(last_index) + map_op.Size();
+}
+
+void ReplicationRequest::Marshal(char *buffer) {
+	int net_factory_id = htonl(factory_id);
+	int net_committed_index = htonl(committed_index);
+	int net_last_index = htonl(last_index);
+
+	int offset = 0;
+
+	memcpy(buffer + offset, &net_factory_id, sizeof(net_factory_id));
+	offset += sizeof(net_factory_id);
+	memcpy(buffer + offset, &net_committed_index, sizeof(net_committed_index));
+	offset += sizeof(net_committed_index);
+	memcpy(buffer + offset, &net_last_index, sizeof(net_last_index));
+	offset += sizeof(net_last_index);
+
+	char *map_buff;
+	map_op.Marshal(map_buff);
+	// check if it works
+	memcpy(buffer + offset, &map_buff, map_op.Size());
+}
+
+void ReplicationRequest::Unmarshal(char *buffer) {
+	int net_factory_id;
+	int net_committed_index;
+	int net_last_index;
+
+	int offset = 0;
+
+	memcpy(&net_factory_id, buffer + offset, sizeof(net_factory_id));
+	offset += sizeof(net_factory_id);
+	memcpy(&net_committed_index, buffer + offset, sizeof(net_committed_index));
+	offset += sizeof(net_committed_index);
+	memcpy(&net_last_index, buffer + offset, sizeof(net_last_index));
+	offset += sizeof(net_last_index);
+
+	factory_id = ntohl(net_factory_id);
+	committed_index = ntohl(net_committed_index);
+	last_index = ntohl(net_last_index);
+
+	char *map_buff;
+	memcpy(&map_buff, buffer + offset, map_op.Size());
+	map_op.Unmarshal(map_buff);
+}
+
+bool ReplicationRequest::IsValid() {
+	return (factory_id != -1);
+}
+
+void ReplicationRequest::Print() {
+	std::cout << "factory_id " << factory_id << " ";
+	std::cout << "committed_index " << committed_index << " ";
+	std::cout << "last_index " << last_index << " ";
+	map_op.Print();
+}
+
+
+IdentifyMessage::IdentifyMessage() {
+	identify = -1;
+}
+
+int IdentifyMessage::Size() {
+	return sizeof(identify);
+}
+
+int IdentifyMessage::SetIdentifyFlag(int ident) {
+	identify = ident;
+}
+
+int IdentifyMessage::GetIdentifyFlag() {
+	return identify;
+}
+
+bool IdentifyMessage::IsValid() {
+	return (identify != -1);
+}
+
+
+void IdentifyMessage::Marshal(char *buffer) {
+	int net_identify = htonl(identify);
+	memcpy(buffer, &net_identify, sizeof(net_identify));
+}
+
+void IdentifyMessage::Unmarshal(char *buffer) {
+	int net_identify;
+	memcpy(&net_identify, buffer, sizeof(net_identify));
+	identify = ntohl(net_identify);
 }

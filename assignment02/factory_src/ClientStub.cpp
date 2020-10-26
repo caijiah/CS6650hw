@@ -35,3 +35,11 @@ CustomerRecord ClientStub::ReadRecord(CustomerRequest crq) {
 	}
 	return cus_rec;
 }
+
+void ClientStub::SendIdentifyMessage(IdentifyMessage identify_message) {
+	int buff_size = sizeof(int);
+	char buffer[buff_size];
+	identify_message.Marshal(buffer);
+	int size = identify_message.Size();
+	socket.Send(buffer, size, 0);
+}

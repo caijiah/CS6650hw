@@ -3,6 +3,9 @@
 
 #include <string>
 
+#define CLIENT 0
+#define PFA 1
+
 class RobotOrder {
 private:
 	int customer_id;
@@ -130,6 +133,88 @@ public:
 	bool IsValid();
 
 	void Print();
+};
+
+class MapOp {
+private:
+	int opcode; // operation code: 1 - update value 
+	int arg1; // customer_id to apply the operation 
+	int arg2; // parameter for the operation
+public:
+	MapOp();
+	void operator = (const MapOp &map_op) {
+		opcode = map_op.opcode;
+		arg1 = map_op.arg1;
+		arg2 = map_op.arg2;
+	}
+	void SetMapOp(int oc, int a1, int a2);
+	void SetOpcode(int oc);
+	void SetArg1(int a1);
+	void SetArg2(int a2);
+
+	int GetOpcode();
+	int GetArg1();
+	int GetArg2();
+
+	int Size();
+
+	void Marshal(char * buffer);
+	void Unmarshal(char * buffer);
+
+	bool IsValid();
+	
+	void Print();
+};
+
+class ReplicationRequest {
+private:
+	int factory_id;
+	int committed_index;
+	int last_index;
+	MapOp map_op;
+public:
+	ReplicationRequest();
+	void operator = (const ReplicationRequest &replica_rq) {
+		factory_id = replica_rq.factory_id;
+		committed_index = replica_rq.committed_index;
+		last_index = replica_rq.last_index;
+		map_op = replica_rq.map_op;
+	}
+	void SetRequest(int fid, int commit_index, int last_inde, MapOp mo);
+	void SetFactoryId(int fid);
+	void SetCommittedIndex(int commit_index);
+	void SetLastIndex(int last_inde);
+	void SetMapOp(MapOp mo);
+
+	int GetFactoryId();
+	int GetCommittedIndex();
+	int GetLastIndex();
+	MapOp GetMapOp();
+
+	int Size();
+
+	void Marshal(char *buffer);
+	void Unmarshal(char *buffer);
+
+	bool IsValid();
+
+	void Print();
+};
+
+
+class IdentifyMessage {
+private:
+	int identify;
+public:
+	IdentifyMessage();
+	int Size();
+	int SetIdentifyFlag(int ident);
+	int GetIdentifyFlag();
+
+	bool IsValid();
+
+	void Marshal(char *buffer);
+	void Unmarshal(char *buffer);
 };
 
 #endif // #ifndef __MESSAGES_H__
