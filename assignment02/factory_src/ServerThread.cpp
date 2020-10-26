@@ -183,7 +183,7 @@ void RobotFactory::AdminThread(int id) {
 			std::map<int, Peer>::iterator it;
 			for ( it = admin_config.peers.begin(); it != admin_config.peers.end(); it++ ) {
 				Peer peer = it->second;
-				std::unique_ptrFactoryStub> factory_stub = std::unique_ptr<FactoryStub>(new FactoryStub);
+				std::unique_ptr<FactoryStub> factory_stub = std::unique_ptr<FactoryStub>(new FactoryStub);
 				std::cout << "FactoryStub init" << std::endl;
 				if (!factory_stub->Init(peer.GetPeerIP(), peer.GetPeerPort())) {
 					std::cout << "Peer " << peer.GetPeerID() << " failed to connect" << std::endl;
