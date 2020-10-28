@@ -27,6 +27,15 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 		if (stub.SendIdentifyMessage(identify_message) == CLIENT) {
 			robot = stub.Order(crq);
 		} else {
+			// if we want to make sure that the customer make the order
+			// instead of break, we can do:
+			// (This kind of failure only happens very large orders
+			// for example 1000 make 100 orders. I think it is just too
+			// many orders, since we want to test the time > 10 secs but
+			// not more than 1 mins
+			timer.EndAndMerge();
+			i = i - 1;
+			continue;
 			std::cout << "customer: " << customer_id;
 			std::cout << " failed to make the order." << std::endl;
 			break;
