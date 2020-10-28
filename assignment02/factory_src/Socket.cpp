@@ -93,9 +93,3 @@ void Socket::Close() {
 	//perror("Socket closed");
 	is_initialized_ = false;
 }
-
-
-
-
-
-

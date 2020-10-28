@@ -4,6 +4,7 @@
     peer_id = -1;
     peer_ip = "";
     peer_port = -1;
+    status = true;
  }
 
 Peer::Peer(int p_id, std::string p_ip, int p_port) {
@@ -22,7 +23,13 @@ void Peer::SetPeerPort(int p_port) {
     peer_port = p_port;
 }
 
+void Peer::SetPeerStatus(bool state) {
+  status = state;
+}
 
+bool Peer::GetPeerStatus() {
+  return status;
+}
 
 int Peer::GetPeerID() {
     return peer_id;

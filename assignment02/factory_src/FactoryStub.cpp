@@ -3,10 +3,24 @@
 
 #include "FactoryStub.h"
 
-FactoryStub::FactoryStub() {}
+FactoryStub::FactoryStub() {
+	stub_down = true;
+}
 
 int FactoryStub::Init(std::string ip, int port) {
-	return socket.Init(ip, port);
+	int fd = socket.Init(ip, port);
+	stub_down = false;
+	return fd;
+}
+
+
+bool FactoryStub::GetStubDown() {
+	return stub_down;
+}
+
+void FactoryStub::ShutStubDown() {
+	stub_down = true;
+	socket.Close();
 }
 
 void FactoryStub::SendIdentifyMessage(IdentifyMessage identify_message) {

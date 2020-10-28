@@ -56,10 +56,11 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 		identify_message = server_stub.ReceiveIdentifyMessage();
 		int indentify_flag;
 		indentify_flag = identify_message.GetIdentifyFlag();
+		std::cout << "receive a indentify_flag" << indentify_flag << std::endl;
 		if (indentify_flag == -1) {
 			break;
 		}
-		std::cout << "receive a indentify_flag" << std::endl;
+		// std::cout << "receive a indentify_flag" << std::endl;
 		switch (indentify_flag) {
 			case CLIENT:
 			{
@@ -190,16 +191,17 @@ void RobotFactory::AdminThread(int id) {
 			std::map<int, Peer>::iterator it;
 			for ( it = admin_config.peers.begin(); it != admin_config.peers.end(); it++ ) {
 				Peer peer = it->second;
-				std::unique_ptr<FactoryStub> factory_stub = std::unique_ptr<FactoryStub>(new FactoryStub);
-				std::cout << "FactoryStub init" << std::endl;
-				if (!factory_stub->Init(peer.GetPeerIP(), peer.GetPeerPort())) {
-					std::cout << "Peer " << peer.GetPeerID() << " failed to connect" << std::endl;
-					return;
+				if (peer.GetPeerStatus()) {
+					std::unique_ptr<FactoryStub> factory_stub = std::unique_ptr<FactoryStub>(new FactoryStub);
+					std::cout << "FactoryStub init" << std::endl;
+					if (!factory_stub->Init(peer.GetPeerIP(), peer.GetPeerPort())) {
+						peer.SetPeerStatus(false);
+						std::cout << "Peer " << peer.GetPeerID() << " failed to connect" << std::endl;
+					} else {
+						peer_connections[peer.GetPeerID()] = std::move(factory_stub);
+					}
 				}
-				// std::cout << "FactoryStub done" << std::endl;
-
-				peer_connections[peer.GetPeerID()] = std::move(factory_stub);
-			  }
+			}
 				// std::cout << "make connections?" << std::endl;
 			peer_connected = true;
 		}
@@ -234,16 +236,19 @@ void RobotFactory::AdminThread(int id) {
 		std::map<int, std::unique_ptr<FactoryStub>>::iterator it;
 		for (it = peer_connections.begin(); it != peer_connections.end(); it++ ) {
 			// std::unique_ptr<FactoryStub> each_stub = std::move(it->second);
-			std::cout << "send " << std::endl;
-			it->second->SendIdentifyMessage(identify_message);
-			std::this_thread::sleep_for(std::chrono::microseconds(100));
-			int res = it->second->SendReplicationRequest(replica_req);
-			if (res != admin_config.last_index) {
-				// handle error
-				// perror("ERROR: failed to create a socket");
-				return;
+			if (!it->second->GetStubDown()) {
+				std::cout << "send " << std::endl;
+				it->second->SendIdentifyMessage(identify_message);
+				std::this_thread::sleep_for(std::chrono::microseconds(100));
+				int res = it->second->SendReplicationRequest(replica_req);
+				if (res != admin_config.last_index) {
+					// std::cout << "One back up failed: " << res << std::endl;
+					// handle error
+					perror("ERROR: one backup down");
+					it->second->ShutStubDown();
+					// return;
+				}
 			}
-			// it->second = std::move(each_stub);
 		}
 
 		updateCusRecord();

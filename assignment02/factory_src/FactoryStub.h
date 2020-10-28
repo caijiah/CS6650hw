@@ -9,8 +9,11 @@
 class FactoryStub {
 private:
 	FactorySocket socket;
+	bool stub_down;
 public:
 	FactoryStub();
+	bool GetStubDown();
+	void ShutStubDown();
 	int Init(std::string ip, int port);
 	void SendIdentifyMessage(IdentifyMessage identify_message);
 	int SendReplicationRequest(ReplicationRequest replica_req);
