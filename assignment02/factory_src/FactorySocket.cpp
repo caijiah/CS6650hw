@@ -24,7 +24,7 @@ int FactorySocket::Init(std::string ip, int port) {
 	addr.sin_port = htons(port);
 
 	if ((connect(fd_, (struct sockaddr *) &addr, sizeof(addr))) < 0) {
-		perror("ERROR: failed to connect");
+		perror("ERROR: failed to connect to one peer");
 		return 0;
 	}
 	is_initialized_ = true;

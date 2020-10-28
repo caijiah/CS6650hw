@@ -17,7 +17,7 @@ RobotInfo RobotFactory::CreateRobotAndAdminRequest(CustomerRequest crq, int engi
 	RobotInfo robot;
 	robot.CopyRequest(crq);
 	robot.SetEngineerId(engineer_id);
-	std::cout << "customer_id" << robot.GetCustomerId() << std::endl;
+	// std::cout << "customer_id" << robot.GetCustomerId() << std::endl;
 	int admin_id = -1;
 	CustomerRecord cus_record;
 	cus_record.SetRecord(robot.GetCustomerId(), robot.GetOrderNumber());
@@ -124,11 +124,10 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 					for (int i = temp_last; i < replica_last_index; i++) {
 						MapOp dummy_mapop = MapOp();
 						smr_log.insert((smr_log.begin() + i), dummy_mapop);
-						std::cout << "fix" << i << std::endl;
+						// std::cout << "fix" << i << std::endl;
 						admin_config.last_index += 1;
 					}
-					std::cout << "fixed" << admin_config.last_index << std::endl;
-
+					// std::cout << "fixed" << admin_config.last_index << std::endl;
 				}
 				smr_log.insert((smr_log.begin() + replica_last_index), replica_mop);
 				// std::cout << "check order number " << smr_log[replica_last_index].GetArg2() << std::endl;
@@ -174,7 +173,7 @@ void RobotFactory::updateCusRecord() {
 	} else {
 		customer_record[last_op_cid] = last_op_order_num;
 	}
-	std::cout << "written record"<< last_op_cid << " : " << customer_record[last_op_cid] << std::endl;
+	// std::cout << "written record"<< last_op_cid << " : " << customer_record[last_op_cid] << std::endl;
 	admin_config.committed_index = admin_config.last_index;
 	crd_lock.unlock();
 }
@@ -192,8 +191,8 @@ void RobotFactory::AdminThread(int id) {
 		admin_config_lock.lock();
 		if (admin_config.primary_id != admin_config.unique_id) {
 			if (admin_config.primary_id != -1 ) {
-				std::cout << "primary_id"<< admin_config.primary_id << std::endl;
-				std::cout << "might enter here???" << std::endl;
+				// std::cout << "primary_id"<< admin_config.primary_id << std::endl;
+				// std::cout << "might enter here???" << std::endl;
 				updateCusRecord();
 				std::this_thread::sleep_for(std::chrono::microseconds(100));
 			}
@@ -244,8 +243,7 @@ void RobotFactory::AdminThread(int id) {
 		smr_log_lock.unlock();
 
 		// std::cout << admin_config.last_index << std::endl;
-		std::cout << "last_index:" << admin_config.last_index << std::endl;
-
+		// std::cout << "last_index:" << admin_config.last_index << std::endl;
 
 		IdentifyMessage identify_message;
 		identify_message.SetIdentifyFlag(PFA);
