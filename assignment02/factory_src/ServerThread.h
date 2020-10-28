@@ -49,6 +49,7 @@ private:
 	std::mutex smr_log_lock;
 	std::vector<MapOp> smr_log;
 
+	std::mutex admin_config_lock;
 	AdminConfig admin_config;
 	std::map<int, std::unique_ptr<FactoryStub>> peer_connections;
 	bool peer_connected = false;
