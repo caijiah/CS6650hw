@@ -24,8 +24,13 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 		identify_message.SetIdentifyFlag(CLIENT);
 
 		timer.Start();
-		stub.SendIdentifyMessage(identify_message);
-		robot = stub.Order(crq);
+		if (stub.SendIdentifyMessage(identify_message) == CLIENT) {
+			robot = stub.Order(crq);
+		} else {
+			std::cout << "customer: " << customer_id;
+			std::cout << " failed to make the order." << std::endl;
+			break;
+		}
 		timer.EndAndMerge();
 
 		if (!robot.IsValid()) {

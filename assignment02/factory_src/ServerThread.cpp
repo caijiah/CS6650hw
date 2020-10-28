@@ -64,6 +64,7 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 		switch (indentify_flag) {
 			case CLIENT:
 			{
+				server_stub.SendIdentifyMessageRespone(CLIENT);
 				crq = server_stub.ReceiveRequest();
 				if (!crq.IsValid()) {
 					break;

@@ -18,6 +18,7 @@ public:
 	IdentifyMessage ReceiveIdentifyMessage();
 	ReplicationRequest ReceiveReplicationRequest();
 	int ReturnReplicaResponse(int last_index);
+	int SendIdentifyMessageRespone(int identity);
 };
 
 
