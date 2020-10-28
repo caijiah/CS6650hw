@@ -261,7 +261,7 @@ void RobotFactory::AdminThread(int id) {
 				std::this_thread::sleep_for(std::chrono::microseconds(100));
 				int res = it->second->SendReplicationRequest(replica_req);
 				if (res != admin_config.last_index) {
-					std::cout << "One back up failed: " << it->first << std::endl;
+					// std::cout << "One back up failed: " << it->first << std::endl;
 					// handle error
 					it->second->ShutStubDown();
 					// return;

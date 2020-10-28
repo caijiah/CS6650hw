@@ -71,11 +71,11 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 		if (!record.IsValid()) {
 			std::cout << "Invalid record " << customer_id << std::endl;
 			break;
-			} else {
-			std::cout << "Found record: c_id ";
-			std::cout << record.GetCustomerId() << ", last order :";
-			std::cout << record.GetLastOrder() << std::endl;
-			}
+			// } else {
+			// std::cout << "Found record: c_id ";
+			// std::cout << record.GetCustomerId() << ", last order :";
+			// std::cout << record.GetLastOrder() << std::endl;
+			// }
 		}
 		break;
 	case 3:
