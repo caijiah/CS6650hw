@@ -52,116 +52,116 @@ void RobotFactory::EngineerThread(std::unique_ptr<ServerSocket> socket, int id) 
 
 	server_stub.Init(std::move(socket));
 
-	while (true) {
 		identify_message = server_stub.ReceiveIdentifyMessage();
 		int indentify_flag;
 		indentify_flag = identify_message.GetIdentifyFlag();
 		// std::cout << "receive a indentify_flag" << indentify_flag << std::endl;
-		if (indentify_flag == -1) {
-			break;
-		}
 		// std::cout << "receive a indentify_flag" << std::endl;
 		switch (indentify_flag) {
 			case CLIENT:
 			{
-				server_stub.SendIdentifyMessageRespone(CLIENT);
-				crq = server_stub.ReceiveRequest();
-				if (!crq.IsValid()) {
-					break;
-				}
-				request_type = crq.GetRequestType();
-				switch (request_type) {
-					case 1:
-					{
-						// std::cout << "before create" << std::endl;
-						robot = CreateRobotAndAdminRequest(crq, engineer_id);
-						// std::cout << "Got a robot" << robot.GetCustomerId() << std::endl;
-						server_stub.ShipRobot(robot);
+				while (true) {
+					server_stub.SendIdentifyMessageRespone(CLIENT);
+					crq = server_stub.ReceiveRequest();
+					if (!crq.IsValid()) {
 						break;
 					}
-					case 2:
-					{
-						cid = crq.GetCustomerId();
-						// defaul
-						// std::cout << "Got read request" << cid << std::endl;
-
-						crd.SetCustomerId(cid);
-						crd.SetLastOrder(-1);
-						crd_lock.lock();
-						// if find
-						if (customer_record.find(cid) != customer_record.end()) {
-							crd.SetLastOrder(customer_record[cid]);
+					request_type = crq.GetRequestType();
+					switch (request_type) {
+						case 1:
+						{
+							// std::cout << "before create" << std::endl;
+							robot = CreateRobotAndAdminRequest(crq, engineer_id);
+							// std::cout << "Got a robot" << robot.GetCustomerId() << std::endl;
+							server_stub.ShipRobot(robot);
+							break;
 						}
-						crd_lock.unlock();
-						server_stub.ReturnRecord(crd);
-						break;
+						case 2:
+						{
+							cid = crq.GetCustomerId();
+							// defaul
+							// std::cout << "Got read request" << cid << std::endl;
+
+							crd.SetCustomerId(cid);
+							crd.SetLastOrder(-1);
+							crd_lock.lock();
+							// if find
+							if (customer_record.find(cid) != customer_record.end()) {
+								crd.SetLastOrder(customer_record[cid]);
+							}
+							crd_lock.unlock();
+							server_stub.ReturnRecord(crd);
+							break;
+						}
+						default:
+							std::cout << "Undefined request type: "
+								<< request_type << std::endl;
 					}
-					default:
-						std::cout << "Undefined request type: "
-							<< request_type << std::endl;
 				}
 				break;
 			}
 			case PFA:
 			{
-				ReplicationRequest replica_req;
-				replica_req = server_stub.ReceiveReplicationRequest();
-				int primary_factory = replica_req.GetFactoryId();
-				if (admin_config.primary_id != primary_factory) {
-					admin_config.primary_id = primary_factory;
-				}
-				// write log
-				int replica_last_index = replica_req.GetLastIndex();
-				MapOp replica_mop = replica_req.GetMapOp();
-				// std::cout << replica_mop.GetOpcode() << std::endl;
-				// std::cout << replica_mop.GetArg1() << std::endl;
-				// std::cout << replica_mop.GetArg2() << std::endl;
-				// std::cout << "commited order number " <<  replica_mop.GetArg2() << std::endl;
+				while (true) {
+					ReplicationRequest replica_req;
+					replica_req = server_stub.ReceiveReplicationRequest();
+					int primary_factory = replica_req.GetFactoryId();
+					if (admin_config.primary_id != primary_factory) {
+						admin_config.primary_id = primary_factory;
+					}
+					// write log
+					int replica_last_index = replica_req.GetLastIndex();
+					MapOp replica_mop = replica_req.GetMapOp();
+					// std::cout << replica_mop.GetOpcode() << std::endl;
+					// std::cout << replica_mop.GetArg1() << std::endl;
+					// std::cout << replica_mop.GetArg2() << std::endl;
+					// std::cout << "commited order number " <<  replica_mop.GetArg2() << std::endl;
 
-				smr_log_lock.lock();
-				// std::cout << "last index" << replica_last_index << std::endl;
-				if ((replica_last_index - admin_config.last_index) > 1) {
-					int temp_last = admin_config.last_index;
-					for (int i = temp_last; i < replica_last_index; i++) {
-						MapOp dummy_mapop = MapOp();
-						smr_log.insert((smr_log.begin() + i), dummy_mapop);
-						// std::cout << "fix" << i << std::endl;
-						admin_config.last_index += 1;
-					}
-					// std::cout << "fixed" << admin_config.last_index << std::endl;
-				}
-				smr_log.insert((smr_log.begin() + replica_last_index), replica_mop);
-				// std::cout << "check order number " << smr_log[replica_last_index].GetArg2() << std::endl;
-				// std::cout << "after set smr_log" << std::endl;
-				smr_log_lock.unlock();
-				admin_config.last_index = replica_last_index;
-				// Applies MapOp in the req.committed index of smr log to the customer record and
-				// update self.committed index; and
-				int replica_commited_index = replica_req.GetCommittedIndex();
-				// std::cout << "commited index" << replica_commited_index << std::endl;
-				if (replica_commited_index != -1) {
 					smr_log_lock.lock();
-					MapOp op_replica_commited = smr_log[replica_commited_index];
-					smr_log_lock.unlock();
-					int commited_op_cid = op_replica_commited.GetArg1();
-					int commited_op_order_num = op_replica_commited.GetArg2();
-					// std::cout << "commited order number " <<  commited_op_order_num << std::endl;
-					crd_lock.lock();
-					if (customer_record.find(commited_op_cid) == customer_record.end()) {
-						customer_record.insert({commited_op_cid, commited_op_order_num});
-					} else {
-						customer_record[commited_op_cid] = commited_op_order_num;
+					// std::cout << "last index" << replica_last_index << std::endl;
+					if ((replica_last_index - admin_config.last_index) > 1) {
+						int temp_last = admin_config.last_index;
+						for (int i = temp_last; i < replica_last_index; i++) {
+							MapOp dummy_mapop = MapOp();
+							smr_log.insert((smr_log.begin() + i), dummy_mapop);
+							// std::cout << "fix" << i << std::endl;
+							admin_config.last_index += 1;
+						}
+						// std::cout << "fixed" << admin_config.last_index << std::endl;
 					}
-					crd_lock.unlock();
-					admin_config.committed_index = replica_commited_index;
-				}
-				server_stub.ReturnReplicaResponse(admin_config.last_index);
+					smr_log.insert((smr_log.begin() + replica_last_index), replica_mop);
+					// std::cout << "check order number " << smr_log[replica_last_index].GetArg2() << std::endl;
+					// std::cout << "after set smr_log" << std::endl;
+					smr_log_lock.unlock();
+					admin_config.last_index = replica_last_index;
+					// Applies MapOp in the req.committed index of smr log to the customer record and
+					// update self.committed index; and
+					int replica_commited_index = replica_req.GetCommittedIndex();
+					// std::cout << "commited index" << replica_commited_index << std::endl;
+					if (replica_commited_index != -1) {
+						smr_log_lock.lock();
+						MapOp op_replica_commited = smr_log[replica_commited_index];
+						smr_log_lock.unlock();
+						int commited_op_cid = op_replica_commited.GetArg1();
+						int commited_op_order_num = op_replica_commited.GetArg2();
+						// std::cout << "commited order number " <<  commited_op_order_num << std::endl;
+						crd_lock.lock();
+						if (customer_record.find(commited_op_cid) == customer_record.end()) {
+							customer_record.insert({commited_op_cid, commited_op_order_num});
+						} else {
+							customer_record[commited_op_cid] = commited_op_order_num;
+						}
+						crd_lock.unlock();
+						admin_config.committed_index = replica_commited_index;
+					}
+					server_stub.ReturnReplicaResponse(admin_config.last_index);
+					}
 				break;
 			}
 			default:
 				std::cout << "Undefined identity type: " << indentify_flag << std::endl;
+				break;
 		}
-	}
 }
 
 void RobotFactory::updateCusRecord() {
