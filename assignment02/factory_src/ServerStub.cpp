@@ -56,10 +56,3 @@ int ServerStub::ReturnReplicaResponse(int last_index) {
 	memcpy(buffer, &net_last_index, sizeof(net_last_index));
 	return socket->Send(buffer, sizeof(int), 0);
 }
-
-int ServerStub::SendIdentifyMessageRespone(int identity) {
-	char buffer[sizeof(int)];
-	int net_identity = htonl(identity);
-	memcpy(buffer, &net_identity, sizeof(net_identity));
-	return socket->Send(buffer, sizeof(int), 0);
-}

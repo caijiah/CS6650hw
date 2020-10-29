@@ -45,3 +45,13 @@ int FactoryStub::SendReplicationRequest(ReplicationRequest replica_req) {
 	}
 	return ntohl(net_res);
 }
+
+
+
+void FactoryStub::SetIdentified(bool state) {
+  identified = state;
+}
+
+bool FactoryStub::GetIdentified() {
+  return identified;
+}

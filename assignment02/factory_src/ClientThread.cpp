@@ -42,7 +42,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 			CustomerRecord record;
 			crq.SetRequest(customer_id, i, req_type);
 
-			
+
 			timer.Start();
 			record = stub.ReadRecord(crq);
 			timer.EndAndMerge();
@@ -64,7 +64,6 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 			CustomerRecord record;
 			crq.SetRequest(i, -1, 2);
 
-			
 			timer.Start();
 			record = stub.ReadRecord(crq);
 			timer.EndAndMerge();

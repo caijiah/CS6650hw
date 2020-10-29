@@ -38,17 +38,10 @@ CustomerRecord ClientStub::ReadRecord(CustomerRequest crq) {
 	return cus_rec;
 }
 
-int ClientStub::SendIdentifyMessage(IdentifyMessage identify_message) {
+void ClientStub::SendIdentifyMessage(IdentifyMessage identify_message) {
 	int buff_size = sizeof(int);
 	char buffer[buff_size];
-	int net_response;
 	identify_message.Marshal(buffer);
 	int size = identify_message.Size();
-	if (socket.Send(buffer, size, 0)) {
-		size = buff_size;
-		if (socket.Recv(buffer, size, 0)) {
-			memcpy(&net_response, buffer, sizeof(net_response));
-		}
-	}
-	return ntohl(net_response);
+	socket.Send(buffer, size, 0);
 }

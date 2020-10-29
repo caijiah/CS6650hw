@@ -14,7 +14,7 @@ public:
 	int Init(std::string ip, int port);
 	RobotInfo Order(CustomerRequest crq);
 	CustomerRecord ReadRecord(CustomerRequest crq);
-	int SendIdentifyMessage(IdentifyMessage identify_message);
+	void SendIdentifyMessage(IdentifyMessage identify_message);
 };
 
 
