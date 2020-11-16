@@ -42,8 +42,10 @@ ReadResponse ClientStub::SendRead(tx_read read_req) {
 	memcpy(buffer + offset, &tx_read_buffer, read_req.Size());
 	size = read_req.Size() + identify.Size();
 
-	if (socket.Send(buffer, size, 0)) {
+	if (int sd = socket.Send(buffer, size, 0)) {
 		size = res.Size();
+		std::cout << "sd " << sd << " ";
+		std::cout << "size " << size << std::endl;
 		if (socket.Recv(buffer, size, 0)) {
 			res.Unmarshal(buffer);
 		}
