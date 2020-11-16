@@ -54,10 +54,15 @@ int Socket::Recv(char *buffer, int size, int flags) {
 	int offset = 0;
 	while (size > 0) {
 		std::cout <<"before recv" << std::endl;
+		std::cout << "fd " << fd_ << " ";
+		std::cout << "size " << size << " ";
+		std::cout << "flags " << flags << " ";
+		std::cout << "buffer " << buffer << std::endl;
+	
 		try {
-		bytes_read = recv(fd_, buffer + offset, size, flags);
+			bytes_read = recv(fd_, buffer + offset, size, flags);
 		} catch (const char* msg) {
-		std::cout <<"error" << std::endl;
+			std::cout <<"error" << std::endl;
 		}
 		std::cout <<"socket Recv" << std::endl;
 		if (bytes_read <= 0) {
