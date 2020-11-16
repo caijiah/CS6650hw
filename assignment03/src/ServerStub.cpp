@@ -1,6 +1,7 @@
 #include "ServerStub.h"
 
 #include <cstring>
+#include <iostream>
 #include <arpa/inet.h>
 
 ServerStub::ServerStub() {}
@@ -15,16 +16,22 @@ RobotOrder ServerStub::ReceiveOrder() {
 	if (socket->Recv(buffer, order.Size(), 0)) {
 		order.Unmarshal(buffer);
 	}
-	return order;	
+	return order;
 }
 
 int ServerStub::ReadIdentify() {
 	char buffer[4];
 	int net_identify;
-	if (socket->Recv(buffer, sizeof(net_identify), 0)) {
+	std::cout << "read" << std::endl;
+
+	if (socket->Recv(buffer, sizeof(int), 0)) {
+		std::cout << "get" << std::endl;
 		memcpy(&net_identify, buffer, sizeof(net_identify));
+		return ntohl(net_identify);
+	} else {
+		std::cout << "didn't get" << std::endl;
+		return -1;
 	}
-	return ntohl(net_identify);
 }
 
 
@@ -49,13 +56,13 @@ tx ServerStub::ReceiveTX() {
 int ServerStub::SendDecision(int d) {
 	char buffer[4];
 	int net_d = htonl(d);
-	memcpy(&buffer, &net_d, sizeof(net_d));
+	memcpy(buffer, &net_d, sizeof(net_d));
 	return socket->Send(buffer, sizeof(net_d), 0);
 }
 
 int ServerStub::SendReadResponse(ReadResponse r_res) {
 	char buffer[12];
-	r_res.Unmarshal(buffer);
+	r_res.Marshal(buffer);
 	return socket->Send(buffer, r_res.Size(), 0);
 }
 
@@ -64,4 +71,3 @@ int ServerStub::SendRobot(RobotInfo info) {
 	info.Marshal(buffer);
 	return socket->Send(buffer, info.Size(), 0);
 }
-

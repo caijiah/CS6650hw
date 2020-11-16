@@ -48,11 +48,20 @@ int Socket::Send(char *buffer, int size, int flags) {
 }
 
 int Socket::Recv(char *buffer, int size, int flags) {
+	std::cout <<"Recv" << std::endl;
+
 	int bytes_read = 0;
 	int offset = 0;
 	while (size > 0) {
+		std::cout <<"before recv" << std::endl;
+		try {
 		bytes_read = recv(fd_, buffer + offset, size, flags);
+		} catch (const char* msg) {
+		std::cout <<"error" << std::endl;
+		}
+		std::cout <<"socket Recv" << std::endl;
 		if (bytes_read <= 0) {
+			std::cout <<"didn't recv" << std::endl;
 			/*
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
 				//perror("ERROR: recv retry");
@@ -93,9 +102,3 @@ void Socket::Close() {
 	//perror("Socket closed");
 	is_initialized_ = false;
 }
-
-
-
-
-
-

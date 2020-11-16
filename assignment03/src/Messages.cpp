@@ -1,8 +1,8 @@
-#include <cstring>
-#include <iostream>
+#include "Messages.h"
 
 #include <arpa/inet.h>
-#include "Messages.h"
+#include <cstring>
+#include <iostream>
 
 RobotOrder::RobotOrder() {
 	customer_id = -1;
@@ -237,7 +237,7 @@ void tx_write::CopyTxWrite(tx_write wr) {
 	bid = wr.GetBid();
 	customer_id = wr.GetCustomerId();
 }
-	
+
 void tx_write::SetRobortId(int rid) {
 	robot_id = rid;
 }
@@ -253,7 +253,7 @@ void tx_write::SetCustomerId(int cid) {
 int tx_write::GetRobotId() {
 	return robot_id;
 }
-	
+
 int tx_write::GetBid() {
 	return bid;
 }
@@ -415,7 +415,7 @@ bool tx::IsValid() {
 }
 
 void tx::Print() {
-	std::cout << "ver " << version << " ";
+	std::cout << "ver " << version << std::endl;
 	for(auto i = tx_reads.begin(); i != tx_reads.end(); ++i)
     {
 		i->Print();

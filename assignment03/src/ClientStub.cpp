@@ -1,12 +1,14 @@
 #include "ClientStub.h"
 
+#include <arpa/inet.h>
 #include <cstring>
 #include <iostream>
+
 
 ClientStub::ClientStub() {}
 
 int ClientStub::Init(std::string ip, int port) {
-	return socket.Init(ip, port);	
+	return socket.Init(ip, port);
 }
 
 RobotInfo ClientStub::OrderRobot(RobotOrder order) {
@@ -19,7 +21,7 @@ RobotInfo ClientStub::OrderRobot(RobotOrder order) {
 		size = info.Size();
 		if (socket.Recv(buffer, size, 0)) {
 			info.Unmarshal(buffer);
-		} 
+		}
 	}
 	return info;
 }
@@ -71,5 +73,3 @@ int ClientStub::SendTX(tx transcation) {
 	}
 	return res;
 }
-
-

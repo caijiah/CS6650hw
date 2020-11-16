@@ -41,7 +41,6 @@ RobotInfo RobotFactory::CreateSpecialRobot(RobotOrder order, int engineer_id) {
 }
 
 void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
-	int engineer_id = id;
 	int robot_id;
 	int version;
 	int bidding_info;
@@ -55,11 +54,14 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 	stub.Init(std::move(socket));
 
 	while (true) {
+		std::cout << "try to read " << std::endl;
 		identity = stub.ReadIdentify();
+		std::cout << "identity: " << identity << std::endl;
 		switch (identity) {
 			case TX_READ_IDENTIFY:
 			{
 				tx_r = stub.ReceiveTxRead();
+				//tx_r.Print();
 				robot_id = tx_r.GetRobotId();
 				kv_table_lock.lock();
 				kv_value kv_pair = kv_table[robot_id];
@@ -69,12 +71,14 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 				customer_id = kv_pair.customer_id;
 				ReadResponse rd_res;
 				rd_res.SetInfo(bidding_info, customer_id, version);
+				//rd_res.Print();
 				stub.SendReadResponse(rd_res);
 				break;
 			}
 			case TX_IDENTIFY:
 			{
 				transaction = stub.ReceiveTX();
+				transaction.Print();
 				std::promise<int> RM_decision;
 				std::future<int> fut = RM_decision.get_future();
 
@@ -89,13 +93,14 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 
 				int result = -1;
 				result = fut.get();
-				stub.SendDecision(result);
+				std::cout << "decision ?" << result << std::endl;
+				int decision_sent = stub.SendDecision(result);
+				std::cout << "finsihed ?" << decision_sent << std::endl;
 				break;
 			}
 			default:
 				std::cout << "Undefined request type: "
 					<< identity << std::endl;
-
 		}
 		// stub.SendRobot(robot);
 	}
@@ -130,6 +135,8 @@ void RobotFactory::TXThread(int id) {
 			// copy
 			kv_value kv_pair = kv_table[read_rid];
 			kv_table_lock.unlock();
+			std::cout << "kv_version " << kv_pair.version << std::endl;
+			std::cout << "read_ver " << read_ver << std::endl;
 			if (read_ver < kv_pair.version) {
 				check_reads = false;
 			}
@@ -147,6 +154,7 @@ void RobotFactory::TXThread(int id) {
 				kv_table[write_rid].customer_id = write_cid;
 				kv_table[write_rid].version = local_version;
 				kv_table_lock.unlock();
+				std::cout << "commited "<< write_rid << std::endl;
 			}
 			req->decision.set_value(1);
 		} else {
@@ -155,6 +163,3 @@ void RobotFactory::TXThread(int id) {
 		}
 	}
 }
-
-
-

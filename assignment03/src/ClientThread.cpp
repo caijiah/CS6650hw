@@ -57,24 +57,24 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 					// sent a read request
 					tx_read read_req;
 					read_req.SetRobortId(robot_id);
+					//read_req.Print();
 					ReadResponse res;
 					// receive read response
 					res = stub.SendRead(read_req);
-					if (!res.IsValid()) {
-						std::cout << "Invalid robot " << customer_id << std::endl;
-						break;
-					}
+					//res.Print();
 					read_req.SetVersion(res.GetVersionNumber());
 					// add read info into the TX
-					tx_reads[i] = read_req;
+					tx_reads[j] = read_req;
 					// add write info into the TX
 					int read_bd = res.GetBid();
 					tx_write write_req;
 					write_req.SetInfo(robot_id, read_bd + 1, customer_id);
-					tx_writes[i] = write_req;
+					tx_writes[j] = write_req;
 				}
 				transcation.SetTxReads(tx_reads);
+				// for (int )
 				transcation.SetTxWrites(tx_writes);
+				transcation.Print();
 				int tx_result = stub.SendTX(transcation);
 			}
 			break;
@@ -85,12 +85,10 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 				ReadResponse res;
 				// receive read response
 				res = stub.SendRead(read_req);
-				if (res.IsValid()) {
 				std::cout << range_start + i << "\t";
 				std::cout << res.GetBid() << "\t";
 				std::cout << res.GetCustomerId() << "\t";
 				std::cout << res.GetVersionNumber() << std::endl;
-				}
 			}
 			break;
 		default:
@@ -99,6 +97,5 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 }
 
 ClientTimer ClientThreadClass::GetTimer() {
-	return timer;	
+	return timer;
 }
-
