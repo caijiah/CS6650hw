@@ -1,0 +1,160 @@
+#include <iostream>
+#include <memory>
+
+#include "ServerThread.h"
+#include "ServerStub.h"
+
+void RobotFactory::SetUpKvTable(int kv_size, int base) {
+	kv_tbl_size = kv_size;
+	kv_base = base;
+	// worry about the memory leak
+	kv_table = new kv_value[kv_tbl_size];
+}
+
+RobotInfo RobotFactory::CreateRegularRobot(RobotOrder order, int engineer_id) {
+	RobotInfo robot;
+	robot.CopyOrder(order);
+	robot.SetEngineerId(engineer_id);
+	robot.SetExpertId(-1);
+	return robot;
+}
+
+RobotInfo RobotFactory::CreateSpecialRobot(RobotOrder order, int engineer_id) {
+	RobotInfo robot;
+	robot.CopyOrder(order);
+	robot.SetEngineerId(engineer_id);
+
+	std::promise<RobotInfo> prom;
+	std::future<RobotInfo> fut = prom.get_future();
+
+	std::unique_ptr<ExpertRequest> req = std::unique_ptr<ExpertRequest>(new ExpertRequest);
+	req->robot = robot;
+	req->prom = std::move(prom);
+
+	erq_lock.lock();
+	erq.push(std::move(req));
+	erq_cv.notify_one();
+	erq_lock.unlock();
+
+	robot = fut.get();
+	return robot;
+}
+
+void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
+	int engineer_id = id;
+	int robot_id;
+	int version;
+	int bidding_info;
+	int customer_id;
+	int identity;
+	tx_read tx_r;
+	tx transaction;
+
+	ServerStub stub;
+
+	stub.Init(std::move(socket));
+
+	while (true) {
+		identity = stub.ReadIdentify();
+		switch (identity) {
+			case TX_READ_IDENTIFY:
+			{
+				tx_r = stub.ReceiveTxRead();
+				robot_id = tx_r.GetRobotId();
+				kv_table_lock.lock();
+				kv_value kv_pair = kv_table[robot_id];
+				kv_table_lock.unlock();
+				bidding_info = kv_pair.bid;
+				version = kv_pair.version;
+				customer_id = kv_pair.customer_id;
+				ReadResponse rd_res;
+				rd_res.SetInfo(bidding_info, customer_id, version);
+				stub.SendReadResponse(rd_res);
+				break;
+			}
+			case TX_IDENTIFY:
+			{
+				transaction = stub.ReceiveTX();
+				std::promise<int> RM_decision;
+				std::future<int> fut = RM_decision.get_future();
+
+				std::unique_ptr<TXRequest> TX_req = std::unique_ptr<TXRequest>(new TXRequest);
+				TX_req->TX_request = transaction;
+				TX_req->decision = std::move(RM_decision);
+
+				txrq_lock.lock();
+				txrq.push(std::move(TX_req));
+				txrq_cv.notify_one();
+				txrq_lock.unlock();
+
+				int result = -1;
+				result = fut.get();
+				stub.SendDecision(result);
+				break;
+			}
+			default:
+				std::cout << "Undefined request type: "
+					<< identity << std::endl;
+
+		}
+		// stub.SendRobot(robot);
+	}
+}
+
+void RobotFactory::TXThread(int id) {
+	int local_version = 0;
+	std::unique_lock<std::mutex> ul(txrq_lock, std::defer_lock);
+	while (true) {
+		ul.lock();
+
+		if (txrq.empty()) {
+			txrq_cv.wait(ul, [this]{ return !txrq.empty(); });
+		}
+		auto req = std::move(txrq.front());
+		erq.pop();
+		local_version += 1;
+		ul.unlock();
+
+		std::this_thread::sleep_for(std::chrono::microseconds(100));
+		tx transaction = req->TX_request;
+		transaction.SetVersionNumber(local_version);
+		std::array<tx_read, 3> tx_reads = transaction.GetTxReads();
+		std::array<tx_write, 3> tx_writes = transaction.GetTxWrites();
+
+		bool check_reads = true;
+		for (int i = 0; i < 3; i++) {
+			tx_read each_read = tx_reads[i];
+			int read_rid = each_read.GetRobotId();
+			int read_ver = each_read.GetVersionNumber();
+			kv_table_lock.lock();
+			// copy
+			kv_value kv_pair = kv_table[read_rid];
+			kv_table_lock.unlock();
+			if (read_ver < kv_pair.version) {
+				check_reads = false;
+			}
+		}
+
+		if (check_reads) {
+			// commit
+			for (int j = 0; j < 3; j++) {
+				tx_write each_wrtie = tx_writes[j];
+				int new_bid = each_wrtie.GetBid();
+				int write_rid = each_wrtie.GetRobotId();
+				int write_cid = each_wrtie.GetCustomerId();
+				kv_table_lock.lock();
+				kv_table[write_rid].bid = new_bid;
+				kv_table[write_rid].customer_id = write_cid;
+				kv_table[write_rid].version = local_version;
+				kv_table_lock.unlock();
+			}
+			req->decision.set_value(1);
+		} else {
+			// abort
+			req->decision.set_value(-1);
+		}
+	}
+}
+
+
+
