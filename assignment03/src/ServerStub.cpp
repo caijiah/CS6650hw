@@ -23,8 +23,8 @@ IdentifyMessage ServerStub::ReadIdentify() {
 	char buffer[10];
 	IdentifyMessage identify;
 	std::cout << "read" << std::endl;
-
-	if (socket->Recv(buffer, identify.Size(), 0)) {
+	int i = 3;
+	if (socket->Recv(buffer, sizeof(i), 0)) {
 		identify.Unmarshal(buffer);
 	}
 	return identify;
