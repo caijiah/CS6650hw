@@ -12,13 +12,13 @@ private:
 public:
 	ServerStub();
 	void Init(std::unique_ptr<ServerSocket> socket);
-	RobotOrder ReceiveOrder();
-	tx_read ReceiveTxRead();
-	tx ReceiveTX();
-	IdentifyMessage ReadIdentify();
-	int SendDecision(int d);
-	int SendReadResponse(ReadResponse r_res);
-	int SendRobot(RobotInfo info);
+	CustomerRequest ReceiveRequest();
+	int ShipRobot(RobotInfo info);
+	int ReturnRecord(CustomerRecord cus_rec);
+	IdentifyMessage ReceiveIdentifyMessage();
+	ReplicationRequest ReceiveReplicationRequest();
+	int ReturnReplicaResponse(int last_index);
 };
+
 
 #endif // end of #ifndef __SERVER_STUB_H__

@@ -70,7 +70,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int orders,
 			if (record.IsValid()) {
 				std::cout << record.GetCustomerId() << "\t";
 				std::cout << record.GetLastOrder() << std::endl;
-			}
+				}
 		}
 		break;
 	default:
