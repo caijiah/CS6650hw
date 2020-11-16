@@ -20,11 +20,11 @@ RobotOrder ServerStub::ReceiveOrder() {
 }
 
 IdentifyMessage ServerStub::ReadIdentify() {
-	char buffer[4];
+	char buffer[10];
 	IdentifyMessage identify;
 	std::cout << "read" << std::endl;
 
-	if (socket->Recv(buffer, sizeof(int), 0)) {
+	if (socket->Recv(buffer, identify.Size(), 0)) {
 		identify.Unmarshal(buffer);
 	}
 	return identify;
