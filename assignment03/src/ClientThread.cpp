@@ -59,7 +59,9 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 					//read_req.Print();
 					ReadResponse res;
 					// receive read response
+					timer.Start();
 					res = stub.SendRead(read_req);
+					timer.EndAndMerge();
 					//res.Print();
 					read_req.SetVersion(res.GetVersionNumber());
 					// add read info into the TX
@@ -73,9 +75,16 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 				transcation.SetTxReads(tx_reads);
 				// for (int )
 				transcation.SetTxWrites(tx_writes);
-				transcation.Print();
+				// transcation.Print();
+				timer.Start();
 				int tx_result = stub.SendTX(transcation);
-				std::cout << "RM decision " <<  tx_result << std::endl;
+				timer.EndAndMerge();
+				if (tx_result == 1) {
+					timer.CommitIncrement();
+				} else {
+					timer.AbortIncrement();
+				}
+				// std::cout << "RM decision " <<  tx_result << std::endl;
 			}
 			break;
 		case 3:

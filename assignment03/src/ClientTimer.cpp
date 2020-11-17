@@ -8,6 +8,8 @@ ClientTimer::ClientTimer() {
 	max = duration<double, std::micro>(0);
 	min = duration<double, std::micro>(9999999999.9f);
 	op_count = 0;
+	commit_count = 0;
+	abort_count = 0;
 }
 
 void ClientTimer::Start() {
@@ -31,6 +33,14 @@ void ClientTimer::EndAndMerge() {
 	}
 }
 
+void ClientTimer::CommitIncrement() {
+	commit_count++;
+}
+
+void ClientTimer::AbortIncrement() {
+	abort_count++;
+}
+
 void ClientTimer::Merge(ClientTimer timer) {
 	sum += timer.sum;
 	op_count += timer.op_count;
@@ -44,9 +54,10 @@ void ClientTimer::Merge(ClientTimer timer) {
 
 void ClientTimer::PrintStats() {
 	std::cout << std::fixed << std::setprecision(3);
-	std::cout << sum.count() / op_count << "\t";
-	std::cout << min.count() << "\t";
-	std::cout << max.count() << "\t";
-	std::cout << op_count / elapsed_time.count() * 1000000.0f << std::endl;
+	std::cout << commit_count << "\t";
+	std::cout << abort_count << "\t";
+	std::cout << commit_count / (commit_count + abort_count) << "\t";
+	std::cout << (commit_count + abort_count) / elapsed_time.count() * 1000000.0f << "\t";
+	std::cout << commit_count / elapsed_time.count() * 1000000.0f << std::endl;
 }
 

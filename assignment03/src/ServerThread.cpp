@@ -75,9 +75,9 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 				transaction = stub.ReceiveTX();
 				transaction.Print();
 				result = SendToTXThread(transaction);
-				std::cout << "decision ?" << result << std::endl;
+				// std::cout << "decision ?" << result << std::endl;
 				stub.SendDecision(result);
-				std::cout << "finsihed ?" << std::endl;
+				// std::cout << "finsihed ?" << std::endl;
 				break;
 			default:
 				std::cout << "Undefined request type: "
@@ -143,7 +143,7 @@ void RobotFactory::TXThread(int id) {
 				std::cout << kv_table[write_rid].customer_id;
 				std::cout << kv_table[write_rid].version;
 				kv_table_lock.unlock();
-				std::cout << "commited "<< write_rid << std::endl;
+				// std::cout << "commited "<< write_rid << std::endl;
 			}
 			req->decision.set_value(1);
 		} else {

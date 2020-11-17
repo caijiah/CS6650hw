@@ -11,6 +11,8 @@ public:
 	duration<double, std::micro> max;
 	duration<double, std::micro> min;
 	int op_count;
+	int commit_count;
+	int abort_count;
 
 	time_point<std::chrono::high_resolution_clock> start_time;
 	duration<double, std::micro> elapsed_time;
@@ -27,6 +29,8 @@ public:
 	void Start();
 	void End();
 	void EndAndMerge();
+	void CommitIncrement();
+	void AbortIncrement();
 	void Merge(ClientTimer timer);
 	void PrintStats();
 };
