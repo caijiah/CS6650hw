@@ -32,15 +32,13 @@ ReadResponse ClientStub::SendRead(tx_read read_req) {
 	read_req.Marshal(tx_read_buffer);
 
 	char buffer[20];
-	IdentifyMessage identify;
-	identify.SetIdentifyFlag(TX_READ_IDENTIFY);
-	// int net_identify = htonl(TX_READ_IDENTIFY);
+	int net_identify = htonl(TX_READ_IDENTIFY);
 	int offset = 0;
 	int size;
-	identify.Marshal(buffer);
-	offset = sizeof(identify.Size());
+	memcpy(buffer + offset, &net_identify, sizeof(net_identify));
+	offset = sizeof(net_identify);
 	memcpy(buffer + offset, &tx_read_buffer, read_req.Size());
-	size = read_req.Size() + identify.Size();
+	size = read_req.Size() + sizeof(net_identify);
 
 	if (int sd = socket.Send(buffer, size, 0)) {
 		size = res.Size();
@@ -59,16 +57,13 @@ int ClientStub::SendTX(tx transcation) {
 	transcation.Marshal(tx_buffer);
 
 	char buffer[68];
-	IdentifyMessage identify;
-	identify.SetIdentifyFlag(TX_IDENTIFY);
-	// int net_identify = htonl(TX_IDENTIFY);
+	int net_identify = htonl(TX_IDENTIFY);
 	int offset = 0;
 	int size;
-	// memcpy(buffer + offset, &net_identify, sizeof(net_identify));
-	identify.Marshal(buffer);
-	offset = identify.Size();
+	memcpy(buffer + offset, &net_identify, sizeof(net_identify));
+	offset = sizeof(net_identify);
 	memcpy(buffer + offset, &tx_buffer, transcation.Size());
-	size = transcation.Size() + identify.Size();
+	size = transcation.Size() + sizeof(net_identify);
 
 	if (socket.Send(buffer, size, 0)) {
 		size = sizeof(int);

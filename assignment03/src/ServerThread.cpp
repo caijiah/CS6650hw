@@ -55,9 +55,9 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 
 	while (true) {
 		std::cout << "try to read " << std::endl;
-		IdentifyMessage identity_msg;
-		identity_msg = stub.ReadIdentify();
-		identity = identity_msg.GetIdentifyFlag();
+		// IdentifyMessage identity_msg;
+		identity = stub.ReadIdentify();
+		// identity = identity_msg.();
 		std::cout << "identity: " << identity << std::endl;
 		switch (identity) {
 			case TX_READ_IDENTIFY:

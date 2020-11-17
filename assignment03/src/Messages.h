@@ -197,20 +197,5 @@ public:
 	void Print();
 };
 
-class IdentifyMessage {
-private:
-	int identify;
-public:
-	IdentifyMessage();
-	int Size();
-	void SetIdentifyFlag(int ident);
-	int GetIdentifyFlag();
-
-	bool IsValid();
-
-	void Marshal(char *buffer);
-	void Unmarshal(char *buffer);
-};
-
 
 #endif // #ifndef __MESSAGES_H__

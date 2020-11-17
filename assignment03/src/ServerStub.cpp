@@ -19,15 +19,16 @@ RobotOrder ServerStub::ReceiveOrder() {
 	return order;
 }
 
-IdentifyMessage ServerStub::ReadIdentify() {
-	char buffer[10];
-	IdentifyMessage identify;
+int ServerStub::ReadIdentify() {
+	char buffer[4];
+	int net_identify;
 	std::cout << "read" << std::endl;
-	int i = 3;
-	if (socket->Recv(buffer, sizeof(i), 0)) {
-		identify.Unmarshal(buffer);
+	if (socket->Recv(buffer, sizeof(net_identify), 0)) {
+		memcpy(&net_identify, buffer, sizeof(net_identify));
+		return ntohl(net_identify);
+	} else {
+		return -1;
 	}
-	return identify;
 }
 
 tx_read ServerStub::ReceiveTxRead() {

@@ -512,35 +512,3 @@ void ReadResponse::Print() {
 	std::cout << "cid " << customer_id << " ";
 	std::cout << "ver " << version << std::endl;
 }
-
-IdentifyMessage::IdentifyMessage() {
-	identify = -1;
-}
-
-int IdentifyMessage::Size() {
-	return sizeof(identify);
-}
-
-void IdentifyMessage::SetIdentifyFlag(int ident) {
-	identify = ident;
-}
-
-int IdentifyMessage::GetIdentifyFlag() {
-	return identify;
-}
-
-bool IdentifyMessage::IsValid() {
-	return (identify != -1);
-}
-
-
-void IdentifyMessage::Marshal(char *buffer) {
-	int net_identify = htonl(identify);
-	memcpy(buffer, &net_identify, sizeof(net_identify));
-}
-
-void IdentifyMessage::Unmarshal(char *buffer) {
-	int net_identify;
-	memcpy(&net_identify, buffer, sizeof(net_identify));
-	identify = ntohl(net_identify);
-}

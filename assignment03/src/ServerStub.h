@@ -15,7 +15,7 @@ public:
 	RobotOrder ReceiveOrder();
 	tx_read ReceiveTxRead();
 	tx ReceiveTX();
-	IdentifyMessage ReadIdentify();
+	int ReadIdentify();
 	int SendDecision(int d);
 	int SendReadResponse(ReadResponse r_res);
 	int SendRobot(RobotInfo info);
