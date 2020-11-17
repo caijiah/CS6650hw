@@ -23,7 +23,7 @@ struct TXRequest {
 struct kv_value {
 	int bid; // current bid
 	int customer_id; // bidding customer’s id
-	int version; // version number determined by the system 
+	int version; // version number determined by the system
 	kv_value () { bid = 0; customer_id = -1; version = 0; }
 };
 
@@ -43,8 +43,7 @@ private:
 	std::mutex txrq_lock;
 	std::condition_variable txrq_cv;
 
-	RobotInfo CreateRegularRobot(RobotOrder order, int engineer_id);
-	RobotInfo CreateSpecialRobot(RobotOrder order, int engineer_id);
+	int SendToTXThread(tx transaction);
 public:
 	void SetUpKvTable(int kv_size, int base);
 	void WokerThread(std::unique_ptr<ServerSocket> socket, int id);
@@ -52,4 +51,3 @@ public:
 };
 
 #endif // end of #ifndef __SERVERTHREAD_H__
-

@@ -11,7 +11,6 @@
 ClientThreadClass::ClientThreadClass() {}
 
 std::array<int, 3> ClientThreadClass::generate3DinstinctRand() {
-	srand((unsigned) time(0));
 	std::array<int, 3> result;
 	for (int i = 0; i < 3; i++) {
 		int r = rand() % range_end + range_start;
@@ -76,6 +75,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 				transcation.SetTxWrites(tx_writes);
 				transcation.Print();
 				int tx_result = stub.SendTX(transcation);
+				std::cout << "RM decision " <<  tx_result << std::endl;
 			}
 			break;
 		case 3:
@@ -89,8 +89,8 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 				std::cout << res.GetBid() << "\t";
 				std::cout << res.GetCustomerId() << "\t";
 				std::cout << res.GetVersionNumber() << std::endl;
-			}
-			break;
+		}
+		break;
 		default:
 			break;
 	}

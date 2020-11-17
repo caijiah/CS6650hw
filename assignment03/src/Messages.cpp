@@ -288,7 +288,7 @@ void tx_write::Unmarshal(char *buffer) {
 	memcpy(&net_robot_id, buffer + offset, sizeof(net_robot_id));
 	offset += sizeof(net_robot_id);
 	memcpy(&net_bid, buffer + offset, sizeof(net_bid));
-	offset += sizeof(net_customer_id);
+	offset += sizeof(net_bid);
 	memcpy(&net_customer_id, buffer + offset, sizeof(net_customer_id));
 
 	robot_id = ntohl(net_robot_id);
@@ -372,7 +372,7 @@ void tx::Marshal(char *buffer) {
     {
 		char read_buffer[i->Size()];
 		i->Marshal(read_buffer);
-		memcpy(buffer + offset, &read_buffer, i->Size());
+		memcpy(buffer + offset, read_buffer, i->Size());
 		offset += i->Size();
     }
 
@@ -380,7 +380,7 @@ void tx::Marshal(char *buffer) {
     {
 		char write_buffer[j->Size()];
 		j->Marshal(write_buffer);
-		memcpy(buffer + offset, &write_buffer, j->Size());
+		memcpy(buffer + offset, write_buffer, j->Size());
 		offset += j->Size();
     }
 }
@@ -396,7 +396,7 @@ void tx::Unmarshal(char *buffer) {
 	for(auto i = tx_reads.begin(); i != tx_reads.end(); ++i)
     {
 		char read_buffer[i->Size()];
-		memcpy(&read_buffer, buffer + offset, i->Size());
+		memcpy(read_buffer, buffer + offset, i->Size());
 		i->Unmarshal(read_buffer);
 		offset += i->Size();
     }
@@ -404,7 +404,7 @@ void tx::Unmarshal(char *buffer) {
 	for(auto j = tx_writes.begin(); j != tx_writes.end(); ++j)
     {
 		char write_buffer[j->Size()];
-		memcpy(&write_buffer, buffer + offset, j->Size());
+		memcpy(write_buffer, buffer + offset, j->Size());
 		j->Unmarshal(write_buffer);
 		offset += j->Size();
     }

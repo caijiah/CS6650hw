@@ -36,8 +36,8 @@ ReadResponse ClientStub::SendRead(tx_read read_req) {
 	int offset = 0;
 	int size;
 	memcpy(buffer + offset, &net_identify, sizeof(net_identify));
-	offset = sizeof(net_identify);
-	memcpy(buffer + offset, &tx_read_buffer, read_req.Size());
+	offset += sizeof(net_identify);
+	memcpy(buffer + offset, tx_read_buffer, read_req.Size());
 	size = read_req.Size() + sizeof(net_identify);
 
 	if (int sd = socket.Send(buffer, size, 0)) {
@@ -61,8 +61,8 @@ int ClientStub::SendTX(tx transcation) {
 	int offset = 0;
 	int size;
 	memcpy(buffer + offset, &net_identify, sizeof(net_identify));
-	offset = sizeof(net_identify);
-	memcpy(buffer + offset, &tx_buffer, transcation.Size());
+	offset += sizeof(net_identify);
+	memcpy(buffer + offset, tx_buffer, transcation.Size());
 	size = transcation.Size() + sizeof(net_identify);
 
 	if (socket.Send(buffer, size, 0)) {
