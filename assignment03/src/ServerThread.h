@@ -29,10 +29,7 @@ struct kv_value {
 
 class RobotFactory {
 private:
-	std::queue<std::unique_ptr<ExpertRequest>> erq;
-	std::mutex erq_lock;
-	std::condition_variable erq_cv;
-
+	
 	// kv_tbl
 	int kv_tbl_size;
 	int kv_base;
