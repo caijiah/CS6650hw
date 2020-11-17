@@ -125,31 +125,31 @@ void RobotFactory::TXThread(int id) {
 			}
 		}
 
-		if (check_reads) {
-			// commit
-			for (int j = 0; j < 3; j++) {
-				tx_write each_write = tx_writes[j];
-				each_write.Print();
-				int new_bid = each_write.GetBid();
-				int write_rid = each_write.GetRobotId();
-				int write_cid = each_write.GetCustomerId();
-				kv_value new_entry;
-				new_entry.bid = new_bid;
-				new_entry.customer_id = write_cid;
-				new_entry.version = local_version;
-				kv_table_lock.lock();
-				kv_table[write_rid] = new_entry;
-				std::cout << kv_table[write_rid].bid;
-				std::cout << kv_table[write_rid].customer_id;
-				std::cout << kv_table[write_rid].version;
-				kv_table_lock.unlock();
-				std::cout << "commited "<< write_rid << std::endl;
-			}
-			req->decision.set_value(1);
-		} else {
+		// if (check_reads) {
+		// 	// commit
+		// 	for (int j = 0; j < 3; j++) {
+		// 		tx_write each_write = tx_writes[j];
+		// 		each_write.Print();
+		// 		int new_bid = each_write.GetBid();
+		// 		int write_rid = each_write.GetRobotId();
+		// 		int write_cid = each_write.GetCustomerId();
+		// 		kv_value new_entry;
+		// 		new_entry.bid = new_bid;
+		// 		new_entry.customer_id = write_cid;
+		// 		new_entry.version = local_version;
+		// 		kv_table_lock.lock();
+		// 		kv_table[write_rid] = new_entry;
+		// 		std::cout << kv_table[write_rid].bid;
+		// 		std::cout << kv_table[write_rid].customer_id;
+		// 		std::cout << kv_table[write_rid].version;
+		// 		kv_table_lock.unlock();
+		// 		std::cout << "commited "<< write_rid << std::endl;
+		// 	}
+		// 	req->decision.set_value(1);
+		// } else {
 			// abort
 			req->decision.set_value(-1);
-		}
+		// }
 	}
 	std::cout << "quit" << std::endl;
 }
