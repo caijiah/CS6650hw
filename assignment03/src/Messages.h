@@ -6,6 +6,8 @@
 
 #define TX_READ_IDENTIFY 1
 #define TX_IDENTIFY 2
+#define TM_RM_IDENTIFY 3
+#define COMPLETE_SIG 4
 
 class RobotOrder {
 private:

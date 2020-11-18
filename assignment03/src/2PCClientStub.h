@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "ClientSocket.h"
+#include "2PCClientSocket.h"
 #include "Messages.h"
 
 class ClientStub {

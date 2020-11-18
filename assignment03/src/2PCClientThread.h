@@ -5,8 +5,8 @@
 #include <ctime>
 #include <string>
 
-#include "ClientStub.h"
-#include "ClientTimer.h"
+#include "2PCClientStub.h"
+#include "2PCClientTimer.h"
 
 class ClientThreadClass {
 	int customer_id;
