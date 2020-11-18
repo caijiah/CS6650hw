@@ -5,7 +5,7 @@
 #include <vector> 
 #include <cmath>
 
-#include "C2PClientSocket.h"
+#include "2PCClientSocket.h"
 #include "2PCClientThread.h"
 #include "2PCClientTimer.h"
 #include "RM.h"
