@@ -77,7 +77,7 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 					for (auto & rm_c : rms_connections) {
 						if (robot_id >= rm_c->rm_s && robot_id <= rm_c->rm_end) {
 						timer.Start();
-						res = stub.SendRead(read_req);
+						res = rm_c->rm_stub.SendRead(read_req);
 						timer.EndAndMerge();
 						}
 					}

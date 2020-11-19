@@ -88,13 +88,13 @@ int main(int argc, char *argv[]) {
 			std::cout << "out of RMs range" << std::endl;
 			return 0;
 	}
-	
+
 	timer.Start();
 	// as usual
 	for (int i = 0; i < num_customers; i++) {
 		auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
 		std::thread client_thread(&ClientThreadClass::ThreadWriteBody, client_cls,
-				TM_ip, TM_port, i, range_start, range_end, num_reqs, req_type);
+				TM_ip, TM_port, i, range_start, range_end, num_reqs, req_type, rms);
 
 		client_vector.push_back(std::move(client_cls));
 		thread_vector.push_back(std::move(client_thread));
