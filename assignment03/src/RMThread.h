@@ -19,8 +19,8 @@ struct ExpertRequest {
 };
 
 struct TXRequest {
-    int identify;
-    int TM_Req;
+  int identify;
+  int TM_Req;
 	tx transaction;
 	std::promise<int> decision;
 };
@@ -43,8 +43,9 @@ private:
 	std::queue<std::unique_ptr<TXRequest>> txrq;
 	std::mutex txrq_lock;
 	std::condition_variable txrq_cv;
+	tx local_tx;
 
-	int SendToTXThread(std::unique_ptr<TXRequest> tx_req);
+	int SendToTXThread(int ident, int tm_req, tx trans);
 public:
 	void SetUpKvTable(int kv_size, int base);
 	void WokerThread(std::unique_ptr<ServerSocket> socket, int id);

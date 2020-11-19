@@ -99,6 +99,8 @@ void RobotFactory::TXThread(int id) {
 		std::this_thread::sleep_for(std::chrono::microseconds(100));
 		tx transaction = req->transaction;
 		transaction.SetVersionNumber(local_version);
+    std::cout << "check trans: " << std::endl;
+    transaction.Print();
 
         bool final_decision = true;
         for (auto & rm_connection: rm_connections) {
@@ -107,6 +109,8 @@ void RobotFactory::TXThread(int id) {
                 final_decision = false;
             }
         }
+
+        std::cout << "TM receive decison" << final_decision << std::endl;
 
         if (final_decision) {
             req->decision.set_value(1);

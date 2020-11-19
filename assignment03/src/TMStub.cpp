@@ -50,14 +50,12 @@ int ServerStub::ReceiveTMReq() {
 }
 
 int ServerStub::SendDecision(int d) {
-	char buffer[8];
-    int net_identify = htonl(TM_RM_IDENTIFY);
+	char buffer[4];
+  // int net_identify = htonl(TM_RM_IDENTIFY);
 	int net_d = htonl(d);
-    int offset = 0;
-	memcpy(buffer + offset, &net_identify, sizeof(net_identify));
-    offset += sizeof(net_identify);
-    memcpy(buffer + offset, &net_d, sizeof(net_d));
-	return socket->Send(buffer, sizeof(net_identify) + sizeof(net_d), 0);
+  int offset = 0;
+  memcpy(buffer + offset, &net_d, sizeof(net_d));
+	return socket->Send(buffer, sizeof(net_d), 0);
 }
 
 int ServerStub::SendCompleteSig(int sig) {

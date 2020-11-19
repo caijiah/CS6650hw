@@ -49,15 +49,14 @@ void ClientTimer::Merge(ClientTimer timer) {
 	}
 	if (timer.max > max) {
 		max = timer.max;
-	}	
+	}
 }
 
 void ClientTimer::PrintStats() {
 	std::cout << std::fixed << std::setprecision(3);
 	std::cout << commit_count << "\t";
 	std::cout << abort_count << "\t";
-	std::cout << commit_count / (commit_count + abort_count) << "\t";
-	std::cout << (commit_count + abort_count) / elapsed_time.count() * 1000000.0f << "\t";
-	std::cout << commit_count / elapsed_time.count() * 1000000.0f << std::endl;
+	// std::cout << commit_count / (commit_count + abort_count) << "\t";
+	// std::cout << (commit_count + abort_count) / elapsed_time.count() * 1000000.0f << "\t";
+	// std::cout << commit_count / elapsed_time.count() * 1000000.0f << std::endl;
 }
-

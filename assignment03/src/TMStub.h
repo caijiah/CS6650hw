@@ -15,10 +15,10 @@ public:
 	void Init(std::unique_ptr<ServerSocket> socket);
 	tx_read ReceiveTxRead();
 	tx ReceiveTX();
-    int ReceiveTMReq();
+  int ReceiveTMReq();
 	int ReadIdentify();
 	int SendDecision(int d);
-    int SendCompleteSig(int sig);
+  int SendCompleteSig(int sig);
 	int SendReadResponse(ReadResponse r_res);
 };
 

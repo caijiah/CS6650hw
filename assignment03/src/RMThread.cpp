@@ -12,16 +12,44 @@ void RobotFactory::SetUpKvTable(int kv_size, int base) {
 	kv_table = new kv_value[kv_tbl_size];
 }
 
-int RobotFactory::SendToTXThread(std::unique_ptr<TXRequest> tx_req) {
+int RobotFactory::SendToTXThread(int ident, int tm_req, tx trans) {
 	int result;
+	std::unique_ptr<TXRequest> tx_req = std::unique_ptr<TXRequest>(new TXRequest);
 	std::promise<int> RM_decision;
 	std::future<int> fut = RM_decision.get_future();
+	std::cout << "preparing tx_req" << std::endl;
+	switch (ident) {
+		case PREPARE:
+			// std::cout << "in PREPARE" << std::endl;
+			tx_req->identify = ident;
+			// std::cout << "identify done" << std::endl;
+
+			tx_req->transaction = trans;
+			// std::cout << "trans done" << std::endl;
+
+			tx_req->decision = std::move(RM_decision);
+			// std::cout << "decision done" << std::endl;
+			// std::cout << "PREPARE done" << std::endl;
+			break;
+		case COMMIT_ABORT:
+			// std::cout << "in COMMIT_ABORT" << std::endl;
+			tx_req->identify = ident;
+			tx_req->TM_Req = tm_req;
+			tx_req->decision = std::move(RM_decision);
+			std::cout << "COMMIT_ABORT done" << std::endl;
+			break;
+		default:
+			break;
+	}
 
 	txrq_lock.lock();
 	txrq.push(std::move(tx_req));
+	std::cout << "pushed" << std::endl;
+	if (!txrq.empty()) {
+		std::cout << "it is not empty" << std::endl;
+	}
 	txrq_cv.notify_one();
 	txrq_lock.unlock();
-
 
 	result = fut.get();
 	return result;
@@ -38,8 +66,8 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 	ReadResponse rd_res;
 	kv_value kv_pair;
 	int result = -1;
-    int final_decision;
-    std::unique_ptr<TXRequest> tx_req;
+  int final_decision;
+    // std::unique_ptr<TXRequest> tx_req;
 
 
 	ServerStub stub;
@@ -73,22 +101,21 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 			case TX_IDENTIFY:
 				transaction = stub.ReceiveTX();
 				// transaction.Print();
-                tx_req = std::unique_ptr<TXRequest>(new TXRequest);
-                tx_req->identify = PREPARE;
-                tx_req->transaction = transaction;
-				result = SendToTXThread(std::move(tx_req));
+                // tx_req = std::unique_ptr<TXRequest>(new TXRequest);
+        // tx_req->identify = PREPARE;
+        // tx_req->transaction = transaction;
+				result = SendToTXThread(PREPARE, -1, transaction);
 				// std::cout << "decision ?" << result << std::endl;
 				stub.SendDecision(result);
 				// std::cout << "finsihed ?" << std::endl;
 				break;
-            case TM_RM_IDENTIFY:
-                final_decision = stub.ReceiveTMReq();
-                tx_req = std::unique_ptr<TXRequest>(new TXRequest);
-                tx_req->identify = COMMIT_ABORT;
-                tx_req->TM_Req = final_decision;
-                result = SendToTXThread(std::move(tx_req));
-                stub.SendCompleteSig(COMPLETE_SIG);
-                break;
+      case TM_RM_IDENTIFY:
+					std::cout << "asked to commit or abort" << std::endl;
+          final_decision = stub.ReceiveTMReq();
+          // tx_req->TM_Req = final_decision;
+          result = SendToTXThread(COMMIT_ABORT, final_decision, transaction);
+          stub.SendCompleteSig(COMPLETE_SIG);
+          break;
 			default:
 				std::cout << "Undefined request type: "
 					<< identity << std::endl;
@@ -99,12 +126,13 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 }
 
 void RobotFactory::TXThread(int id) {
-	tx local_tx;
 	std::unique_lock<std::mutex> ul(txrq_lock, std::defer_lock);
 	while (true) {
+		std::cout << "tx thread living" << std::endl;
 		ul.lock();
 
 		if (txrq.empty()) {
+			std::cout << "empty? still" << std::endl;
 			txrq_cv.wait(ul, [this]{ return !txrq.empty(); });
 		}
 
@@ -118,6 +146,7 @@ void RobotFactory::TXThread(int id) {
 				int final_decision;
 				std::array<tx_read, 3> tx_reads;
 				std::array<tx_write, 3> tx_writes;
+
         switch (identity)
         {
         case PREPARE:
@@ -126,9 +155,9 @@ void RobotFactory::TXThread(int id) {
 						check_reads = true;
             for (int i = 0; i < 3; i++) {
                 tx_read each_read = tx_reads[i];
-                // each_read.Print();
+                each_read.Print();
                 int read_rid = each_read.GetRobotId();
-                if (kv_base >= read_rid && read_rid <= (kv_base + kv_tbl_size - 1)) {
+                if (read_rid >= kv_base && read_rid <= (kv_base + kv_tbl_size - 1)) {
                     int read_ver = each_read.GetVersionNumber();
                     kv_table_lock.lock();
                     // copy
@@ -150,25 +179,30 @@ void RobotFactory::TXThread(int id) {
         case COMMIT_ABORT:
             final_decision = req->TM_Req;
             if (final_decision == 1) {
+								std::cout << "RM commit" << std::endl;
                 tx_writes = local_tx.GetTxWrites();
                 for (int j = 0; j < 3; j++) {
                     tx_write each_write = tx_writes[j];
+										each_write.Print();
                     int write_rid = each_write.GetRobotId();
-                    if (kv_base >= write_rid && write_rid <= (kv_base + kv_tbl_size - 1)) {
+                    if ( write_rid >= kv_base && write_rid <= (kv_base + kv_tbl_size - 1)) {
                         int new_bid = each_write.GetBid();
                         int write_cid = each_write.GetCustomerId();
                         kv_value new_entry;
+												std::cout << "check local tx: ";
+												local_tx.Print();
                         new_entry.bid = new_bid;
                         new_entry.customer_id = write_cid;
                         new_entry.version = local_tx.GetVersionNumber();
                         kv_table_lock.lock();
                         kv_table[write_rid] = new_entry;
+												std::cout << "after write: " ;
                         std::cout << kv_table[write_rid].bid;
                         std::cout << kv_table[write_rid].customer_id;
-                        std::cout << kv_table[write_rid].version;
+                        std::cout << kv_table[write_rid].version << std::endl;
                         kv_table_lock.unlock();
                     }
-			    }
+			    		}
             }
             req->decision.set_value(COMPLETE_SIG);
             break;

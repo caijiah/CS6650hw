@@ -7,11 +7,13 @@
 #include <array>
 #include <algorithm>
 #include <vector>
+#include <ctime>
 
 
 ClientThreadClass::ClientThreadClass() {}
 
 std::array<int, 3> ClientThreadClass::generate3DinstinctRand() {
+	srand(time(NULL));
 	std::array<int, 3> result;
 	for (int i = 0; i < 3; i++) {
 		int r = rand() % range_end + range_start;
@@ -98,6 +100,7 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 				timer.Start();
 				int tx_result = stub.SendTX(transcation);
 				timer.EndAndMerge();
+				std::cout << "receive res " << tx_result << std::endl;
 				if (tx_result == 1) {
 					timer.CommitIncrement();
 				} else {
