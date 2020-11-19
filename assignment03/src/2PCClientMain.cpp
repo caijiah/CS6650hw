@@ -1,14 +1,14 @@
 #include <array>
-#include <iostream> 
-#include <iomanip> 
-#include <thread> 
-#include <vector> 
+#include <iostream>
+#include <iomanip>
+#include <thread>
+#include <vector>
 #include <cmath>
 
 #include "2PCClientSocket.h"
 #include "2PCClientThread.h"
 #include "2PCClientTimer.h"
-#include "RM.h"
+#include "ResourceManager.h"
 
 int main(int argc, char *argv[]) {
 	std::string TM_ip;
@@ -26,10 +26,10 @@ int main(int argc, char *argv[]) {
 
 	std::vector<std::shared_ptr<ClientThreadClass>> client_vector;
 	std::vector<std::thread> thread_vector;
-	
+
 	if (argc < 4) {
 		std::cout << "not enough arguments" << std::endl;
-		std::cout << argv[0] << "[TM ip] [TM port] "; 
+		std::cout << argv[0] << "[TM ip] [TM port] ";
         std::cout << "[# RMs] (repeat [ip] [port] [# kv pairs] [base key]) ";
 		std::cout << "[key range start] [key range end] [# customer] [# tx] [request type 1 or 3] "<< std::endl;
 		return 0;
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 	// parse RMs
 	if (argc < 4 + 4 * num_RMs) {
 		std::cout << "not enough arguments" << std::endl;
-		std::cout << argv[0] << "[TM ip] [TM port] "; 
+		std::cout << argv[0] << "[TM ip] [TM port] ";
         std::cout << "[# RMs] (repeat [ip] [port] [# kv pairs] [base key]) ";
 		std::cout << "[key range start] [key range end] [# customer] [# tx] [request type 1 or 3] "<< std::endl;
 		return 0;
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 		timer.End();
 
 		for (auto& cls : client_vector) {
-			timer.Merge(cls->GetTimer());	
+			timer.Merge(cls->GetTimer());
 		}
 		timer.PrintStats();
 		return 1;
@@ -132,5 +132,5 @@ int main(int argc, char *argv[]) {
 	default:
 		break;
 	}
-	
+
 }

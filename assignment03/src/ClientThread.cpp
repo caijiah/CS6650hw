@@ -21,9 +21,6 @@ std::array<int, 3> ClientThreadClass::generate3DinstinctRand() {
 			result[i] = r;
 		}
 	}
-	// for (int j = 0; j < 3; j++) {
-    	// cout << result[j] << endl;
-  	// }
 	return result;
 }
 
@@ -79,6 +76,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 				timer.Start();
 				int tx_result = stub.SendTX(transcation);
 				timer.EndAndMerge();
+				std::cout << tx_result << std::endl;
 				if (tx_result == 1) {
 					timer.CommitIncrement();
 				} else {

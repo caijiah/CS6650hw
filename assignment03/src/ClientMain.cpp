@@ -1,8 +1,8 @@
 #include <array>
-#include <iostream> 
-#include <iomanip> 
-#include <thread> 
-#include <vector> 
+#include <iostream>
+#include <iomanip>
+#include <thread>
+#include <vector>
 
 #include "ClientSocket.h"
 #include "ClientThread.h"
@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
 	std::vector<std::shared_ptr<ClientThreadClass>> client_vector;
 	std::vector<std::thread> thread_vector;
-	
+
 	if (argc < 8) {
 		std::cout << "not enough arguments" << std::endl;
 		std::cout << argv[0] << "[RM ip] [RM port #] [range start] [range end] ";
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 	timer.End();
 
 	for (auto& cls : client_vector) {
-		timer.Merge(cls->GetTimer());	
+		timer.Merge(cls->GetTimer());
 	}
 	timer.PrintStats();
 

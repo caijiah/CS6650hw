@@ -3,18 +3,13 @@
 
 #include "TMThread.h"
 #include "TMStub.h"
-#include "ClientStub.h"
+#include "TMClientStub.h"
 #include "Messages.h"
-#include "RM.h"
+#include "ResourceManager.h"
 
-void RobotFactory::SetUpKvTable(int kv_size, int base, int n_rms, std::vector<RM> given_rms) {
-	kv_tbl_size = kv_size;
-	kv_base = base;
-    num_RMs = n_rms;
-    rms = given_rms;
-
-	// worry about the memory leak
-	kv_table = new kv_value[kv_tbl_size];
+void RobotFactory::SetUpKvTable(int n_rms, std::vector<RM> given_rms) {
+  num_RMs = n_rms;
+  rms = given_rms;
 }
 
 int RobotFactory::SendToTXThread(tx transaction) {
@@ -37,18 +32,13 @@ int RobotFactory::SendToTXThread(tx transaction) {
 }
 
 void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
-	int robot_id;
-	int version;
-	int bidding_info;
-	int customer_id;
 	int identity;
 	tx_read tx_r;
 	tx transaction;
 	ReadResponse rd_res;
 	kv_value kv_pair;
 	int result = -1;
-    int final_decision;
-    std::unique_ptr<TXRequest> tx_req;
+  std::unique_ptr<TXRequest> tx_req;
 
 
 	ServerStub stub;
@@ -92,7 +82,7 @@ void RobotFactory::TXThread(int id) {
         }
         rms_connection = true;
     }
-    
+
 	int local_version = 0;
 	std::unique_lock<std::mutex> ul(txrq_lock, std::defer_lock);
 	while (true) {

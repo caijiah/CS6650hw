@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "TMSocket.h"
-#include "ClientStub.h"
 #include "Messages.h"
 #include <vector>
 
@@ -14,7 +13,6 @@ private:
 public:
 	ServerStub();
 	void Init(std::unique_ptr<ServerSocket> socket);
-	void PushRMConnections(std::unique_ptr<ClientStub> rm);
 	tx_read ReceiveTxRead();
 	tx ReceiveTX();
     int ReceiveTMReq();

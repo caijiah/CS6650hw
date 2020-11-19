@@ -10,7 +10,8 @@
 #include "Messages.h"
 #include "TMSocket.h"
 #include "TMStub.h"
-#include "RM.h"
+#include "TMClientStub.h"
+#include "ResourceManager.h"
 
 #define PREPARE 0
 #define COMMIT_ABORT 1
@@ -34,11 +35,6 @@ struct kv_value {
 
 class RobotFactory {
 private:
-	// kv_tbl
-	int kv_tbl_size;
-	int kv_base;
-	struct kv_value *kv_table;
-	std::mutex kv_table_lock;
 	std::vector<RM> rms;
 	bool rms_connection = false;
 	int num_RMs;
@@ -51,7 +47,7 @@ private:
 
 	int SendToTXThread(tx transaction);
 public:
-	void SetUpKvTable(int kv_size, int base, int n_rms, std::vector<RM> rms);
+	void SetUpKvTable(int n_rms, std::vector<RM> rms);
 	void WokerThread(std::unique_ptr<ServerSocket> socket, int id);
 	void TXThread(int id);
 };

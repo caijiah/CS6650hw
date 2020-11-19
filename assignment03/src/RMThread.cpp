@@ -111,15 +111,19 @@ void RobotFactory::TXThread(int id) {
         auto req = std::move(txrq.front());
         txrq.pop();
         ul.unlock();
-        
+
         std::this_thread::sleep_for(std::chrono::microseconds(100));
         int identity = req->identify;
+				bool check_reads;
+				int final_decision;
+				std::array<tx_read, 3> tx_reads;
+				std::array<tx_write, 3> tx_writes;
         switch (identity)
         {
         case PREPARE:
             local_tx = req->transaction;
-            std::array<tx_read, 3> tx_reads = local_tx.GetTxReads();
-            bool check_reads = true;
+          	tx_reads = local_tx.GetTxReads();
+						check_reads = true;
             for (int i = 0; i < 3; i++) {
                 tx_read each_read = tx_reads[i];
                 // each_read.Print();
@@ -144,9 +148,9 @@ void RobotFactory::TXThread(int id) {
             }
             break;
         case COMMIT_ABORT:
-            int final_decision = req->TM_Req;
+            final_decision = req->TM_Req;
             if (final_decision == 1) {
-                std::array<tx_write, 3> tx_writes = local_tx.GetTxWrites();
+                tx_writes = local_tx.GetTxWrites();
                 for (int j = 0; j < 3; j++) {
                     tx_write each_write = tx_writes[j];
                     int write_rid = each_write.GetRobotId();
@@ -170,7 +174,7 @@ void RobotFactory::TXThread(int id) {
             break;
         default:
             break;
-        }   
+        }
 	}
 	std::cout << "quit" << std::endl;
 }

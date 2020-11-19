@@ -6,12 +6,10 @@
 
 #include "TMSocket.h"
 #include "TMThread.h"
-#include "RM.h"
+#include "ResourceManager.h"
 
 int main(int argc, char *argv[]) {
 	int port;
-	int kv_pairs_num;
-	int base_key;
 	int worker_cnt = 0;
 	int num_RMs;
 	ServerSocket socket;
@@ -25,7 +23,8 @@ int main(int argc, char *argv[]) {
 		std::cout << argv[0] << "[port] [# RMs] (repeat [ip] [port] [# kv pairs] [base key])" << std::endl;
 		return 0;
 	}
-	
+	port = atoi(argv[1]);
+	num_RMs = atoi(argv[2]);
 
 	if (argc < 3 + 4 * num_RMs) {
 		std::cout << "not enough arguments" << std::endl;
@@ -34,8 +33,7 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	port = atoi(argv[1]);
-	num_RMs = atoi(argv[2]);
+
 	for (int i = 0; i < num_RMs; i++) {
 		RM new_rm;
 		new_rm.SetRMIP(argv[3 + i*4]);
@@ -45,7 +43,7 @@ int main(int argc, char *argv[]) {
 		rms.push_back(new_rm);
 	}
 
-	factory.SetUpKvTable(kv_pairs_num, base_key, num_RMs, rms);
+	factory.SetUpKvTable(num_RMs, rms);
 
 	std::thread tx_thread(&RobotFactory::TXThread, &factory, worker_cnt++);
 	thread_vector.push_back(std::move(tx_thread));
