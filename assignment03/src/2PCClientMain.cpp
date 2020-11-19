@@ -88,48 +88,26 @@ int main(int argc, char *argv[]) {
 			std::cout << "out of RMs range" << std::endl;
 			return 0;
 	}
+	
+	timer.Start();
+	// as usual
+	for (int i = 0; i < num_customers; i++) {
+		auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
+		std::thread client_thread(&ClientThreadClass::ThreadWriteBody, client_cls,
+				TM_ip, TM_port, i, range_start, range_end, num_reqs, req_type);
 
-	switch (req_type)
-	{
-	case 1:
-		timer.Start();
-	    // as usual
-		for (int i = 0; i < num_customers; i++) {
-			auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
-			std::thread client_thread(&ClientThreadClass::ThreadWriteBody, client_cls,
-					TM_ip, TM_port, i, range_start, range_end, num_reqs, req_type);
-
-			client_vector.push_back(std::move(client_cls));
-			thread_vector.push_back(std::move(client_thread));
-		}
-		for (auto& th : thread_vector) {
-			th.join();
-		}
-		timer.End();
-
-		for (auto& cls : client_vector) {
-			timer.Merge(cls->GetTimer());
-		}
-		timer.PrintStats();
-		return 1;
-		break;
-	case 3:
-		// reads
-		std::cout << "read req 3" << std::endl;
-		for (int i = 0; i < num_customers; i++) {
-			auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
-			std::thread client_thread(&ClientThreadClass::ThreadReadBody, client_cls,
-					rms, i, range_start, range_end, num_reqs, req_type);
-			client_vector.push_back(std::move(client_cls));
-			thread_vector.push_back(std::move(client_thread));
-		}
-		for (auto& th : thread_vector) {
-			th.join();
-		}
-		return 1;
-		break;
-	default:
-		break;
+		client_vector.push_back(std::move(client_cls));
+		thread_vector.push_back(std::move(client_thread));
 	}
+	for (auto& th : thread_vector) {
+		th.join();
+	}
+	timer.End();
+
+	for (auto& cls : client_vector) {
+		timer.Merge(cls->GetTimer());
+	}
+	timer.PrintStats();
+	return 1;
 
 }

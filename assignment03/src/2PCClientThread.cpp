@@ -41,6 +41,18 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 		return;
 	}
 
+	for (auto & g_rm : given_rms) {
+		std::unique_ptr<RMAndConnection> rm_c = std::unique_ptr<RMAndConnection>(new RMAndConnection);
+		rm_c->rm = g_rm;
+		if (!rm_c->rm_stub.Init(g_rm.GetRMIP(), g_rm.GetRMPort())) {
+		std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
+		return;
+		}
+		rm_c->rm_s = g_rm.GetBaseKey();
+		rm_c->rm_end = g_rm.GetBaseKey() + g_rm.GetNumKvPairs() - 1;
+		rms_connections.push_back(std::move(rm_c));
+	}
+
 	switch (robot_type) {
 		case 1:
 			for (int i = 0; i < num_reqs; i++) {
@@ -61,9 +73,14 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 					//read_req.Print();
 					ReadResponse res;
 					// receive read response
-					timer.Start();
-					res = stub.SendRead(read_req);
-					timer.EndAndMerge();
+
+					for (auto & rm_c : rms_connections) {
+						if (robot_id >= rm_c->rm_s && robot_id <= rm_c->rm_end) {
+						timer.Start();
+						res = stub.SendRead(read_req);
+						timer.EndAndMerge();
+						}
+					}
 					//res.Print();
 					read_req.SetVersion(res.GetVersionNumber());
 					// add read info into the TX
@@ -91,20 +108,15 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 			break;
 		case 3:
 			current_index = range_start;
-			for (auto & rm : rms) {
-				int rm_s = rm.GetBaseKey();
-				int rm_end = rm.GetBaseKey() + rm.GetNumKvPairs() - 1;
-				if (!stub.Init(rm.GetRMIP(), rm.GetRMPort())) {
-				std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
-				return;
-				}
-
+			for (auto & rm_c : rms_connections) {
+				int rm_s = rm_c->rm_s;
+				int rm_end = rm_c->rm_end;
 				while (num_reqs > 0 && current_index <= rm_end && current_index >= rm_s) {
 					tx_read read_req;
 					read_req.SetRobortId(current_index);
 					ReadResponse res;
 					// receive read response
-					res = stub.SendRead(read_req);
+					res = rm_c->rm_stub.SendRead(read_req);
 					std::cout << current_index << "\t";
 					std::cout << res.GetBid() << "\t";
 					std::cout << res.GetCustomerId() << "\t";
@@ -117,15 +129,6 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 		default:
 			break;
 	}
-}
-
-void ClientThreadClass::ThreadReadBody(, int id, int rs, int re, int reqs, int type) {
-	customer_id = id;
-	num_reqs = reqs;
-	range_start = rs;
-	range_end = re;
-	rms = given_rms;
-
 }
 
 ClientTimer ClientThreadClass::GetTimer() {

@@ -5,10 +5,18 @@
 #include <ctime>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "2PCClientStub.h"
 #include "2PCClientTimer.h"
 #include "ResourceManager.h"
+
+struct RMAndConnection{
+	RM rm;
+	ClientStub rm_stub;
+	int rm_s;
+	int rm_end;
+};
 
 class ClientThreadClass {
 	int customer_id;
@@ -17,7 +25,7 @@ class ClientThreadClass {
 	int range_start;
 	int range_end;
 	ClientStub stub;
-	std::vector<RM> rms;
+	std::vector<std::unique_ptr<RMAndConnection>> rms_connections;
 
 	ClientTimer timer;
 public:
