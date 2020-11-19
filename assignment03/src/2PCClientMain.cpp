@@ -50,10 +50,17 @@ int main(int argc, char *argv[]) {
 
 	for (int i = 0; i < num_RMs; i++) {
 		RM new_rm;
-		new_rm.SetRMIP(argv[3 + i*4]);
-		new_rm.SetRMPort(atoi(argv[3 + i*4 + 1]));
-		new_rm.SetNumKvPairs(atoi(argv[3 + i*4 + 2]));
-		new_rm.SetBaseKey(atoi(argv[3 + i*4 + 3]));
+		new_rm.SetRMIP(argv[4 + i*4]);
+		std::cout << "ip " << argv[4 + i*4] << std::endl;
+		new_rm.SetRMPort(atoi(argv[4 + i*4 + 1]));
+		std::cout << "port " << atoi(argv[4 + i*4 + 1]) << std::endl;
+
+		new_rm.SetNumKvPairs(atoi(argv[4 + i*4 + 2]));
+		std::cout << "nv_pairs " << atoi(argv[4 + i*4 + 2]) << std::endl;
+
+		new_rm.SetBaseKey(atoi(argv[4 + i*4 + 3]));
+		std::cout << "base " << atoi(argv[4 + i*4 + 3]) << std::endl;
+
 		int rm_start = new_rm.GetBaseKey();
 		int rm_end = rm_start + new_rm.GetNumKvPairs() - 1;
 		if (rm_start < min_rm_start) {
@@ -65,12 +72,17 @@ int main(int argc, char *argv[]) {
 		rms.push_back(new_rm);
 	}
 
-	int after_parse = 3 + 4 * num_RMs;
+	int after_parse = 4 + 4 * num_RMs;
 	range_start = atoi(argv[after_parse]);
 	range_end = atoi(argv[after_parse + 1]);
 	num_customers = atoi(argv[after_parse + 2]);
 	num_reqs = atoi(argv[after_parse + 3]);
 	req_type = atoi(argv[after_parse + 4]);
+
+	std::cout << "min_rm_start " << min_rm_start << std::endl;
+	std::cout << "max_rm_start " << max_rm_end << std::endl;
+	std::cout << "range_start " << range_start << std::endl;
+	std::cout << "range_end " << range_end << std::endl;
 
 	if (!(range_start >= min_rm_start && range_end <= max_rm_end)) {
 			std::cout << "out of RMs range" << std::endl;
@@ -103,6 +115,7 @@ int main(int argc, char *argv[]) {
 		break;
 	case 3:
 		// reads
+		std::cout << "read req 3" << std::endl;
 		for (int i = 0; i < num_customers; i++) {
 			auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
 			std::thread client_thread(&ClientThreadClass::ThreadReadBody, client_cls,
@@ -110,6 +123,10 @@ int main(int argc, char *argv[]) {
 			client_vector.push_back(std::move(client_cls));
 			thread_vector.push_back(std::move(client_thread));
 		}
+		for (auto& th : thread_vector) {
+			th.join();
+		}
+		return 1;
 		break;
 	default:
 		break;

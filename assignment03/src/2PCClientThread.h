@@ -4,6 +4,7 @@
 #include <chrono>
 #include <ctime>
 #include <string>
+#include <vector>
 
 #include "2PCClientStub.h"
 #include "2PCClientTimer.h"
@@ -22,9 +23,7 @@ class ClientThreadClass {
 public:
 	ClientThreadClass();
 	void ThreadWriteBody(std::string ip, int port, int id, int rs,
-					int re, int reqs, int type);
-	void ThreadReadBody(std::vector<RM> given_rms, int id, int rs,
-					int re, int reqs, int type);				
+					int re, int reqs, int type, std::vector<RM> given_rms);
 	ClientTimer GetTimer();
 	std::array<int, 3> generate3DinstinctRand();
 };

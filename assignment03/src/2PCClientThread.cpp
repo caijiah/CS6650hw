@@ -29,12 +29,13 @@ std::array<int, 3> ClientThreadClass::generate3DinstinctRand() {
 }
 
 void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs,
-								   int re, int reqs, int type) {
+								   int re, int reqs, int type, std::vector<RM> given_rms) {
 	customer_id = id;
 	num_reqs = reqs;
 	robot_type = type;
 	range_start = rs;
 	range_end = re;
+	int current_index;
 	if (!stub.Init(ip, port)) {
 		std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
 		return;
@@ -88,41 +89,43 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 				// std::cout << "RM decision " <<  tx_result << std::endl;
 			}
 			break;
-		break;
+		case 3:
+			current_index = range_start;
+			for (auto & rm : rms) {
+				int rm_s = rm.GetBaseKey();
+				int rm_end = rm.GetBaseKey() + rm.GetNumKvPairs() - 1;
+				if (!stub.Init(rm.GetRMIP(), rm.GetRMPort())) {
+				std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
+				return;
+				}
+
+				while (num_reqs > 0 && current_index <= rm_end && current_index >= rm_s) {
+					tx_read read_req;
+					read_req.SetRobortId(current_index);
+					ReadResponse res;
+					// receive read response
+					res = stub.SendRead(read_req);
+					std::cout << current_index << "\t";
+					std::cout << res.GetBid() << "\t";
+					std::cout << res.GetCustomerId() << "\t";
+					std::cout << res.GetVersionNumber() << std::endl;
+					current_index++;
+					num_reqs--;
+				}
+			}
+			break;
 		default:
 			break;
 	}
 }
 
-void ClientThreadClass::ThreadReadBody(std::vector<RM> given_rms, int id, int rs, int re, int reqs, int type) {
+void ClientThreadClass::ThreadReadBody(, int id, int rs, int re, int reqs, int type) {
 	customer_id = id;
 	num_reqs = reqs;
 	range_start = rs;
 	range_end = re;
 	rms = given_rms;
-	int current_index = range_start;
-	for (auto & rm : rms) {
-		int rm_s = rm.GetBaseKey();
-		int rm_end = rm.GetBaseKey() + rm.GetNumKvPairs() - 1;
-		if (!stub.Init(rm.GetRMIP(), rm.GetRMPort())) {
-		std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
-		return;
-		}
 
-		while (num_reqs > 0 && current_index <= rm_end && current_index >= rm_s) {
-			tx_read read_req;
-			read_req.SetRobortId(current_index);
-			current_index++;
-			ReadResponse res;
-			// receive read response
-			res = stub.SendRead(read_req);
-			std::cout << current_index << "\t";
-			std::cout << res.GetBid() << "\t";
-			std::cout << res.GetCustomerId() << "\t";
-			std::cout << res.GetVersionNumber() << std::endl;
-			num_reqs--;
-		}
-	}
 }
 
 ClientTimer ClientThreadClass::GetTimer() {
