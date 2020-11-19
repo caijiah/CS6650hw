@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
 	    // as usual
 		for (int i = 0; i < num_customers; i++) {
 			auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
-			std::thread client_thread(&ClientThreadClass::ThreadBody, client_cls,
+			std::thread client_thread(&ClientThreadClass::ThreadWriteBody, client_cls,
 					TM_ip, TM_port, i, range_start, range_end, num_reqs, req_type);
 
 			client_vector.push_back(std::move(client_cls));
@@ -103,30 +103,12 @@ int main(int argc, char *argv[]) {
 		break;
 	case 3:
 		// reads
-		for (auto & rm : rms) {
-			int rm_start = rm.GetBaseKey();
-			int rm_end = rm_start + rm.GetNumKvPairs() - 1;
-			if (range_start >= rm_start) {
-				if (range_end <= rm_end) {
-					for (int i = 0; i < num_customers; i++) {
-						auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
-						std::thread client_thread(&ClientThreadClass::ThreadBody, client_cls,
-								rm.GetRMIP(), rm.GetRMPort(), i, range_start, range_end, num_reqs, req_type);
-						client_vector.push_back(std::move(client_cls));
-						thread_vector.push_back(std::move(client_thread));
-					}
-				} else {
-					for (int i = 0; i < num_customers; i++) {
-						auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
-						std::thread client_thread(&ClientThreadClass::ThreadBody, client_cls,
-								rm.GetRMIP(), rm.GetRMPort(), i, range_start, rm_end, num_reqs, req_type);
-						client_vector.push_back(std::move(client_cls));
-						thread_vector.push_back(std::move(client_thread));
-					}
-
-					range_start = rm_end + 1;
-				}
-			}
+		for (int i = 0; i < num_customers; i++) {
+			auto client_cls = std::shared_ptr<ClientThreadClass>(new ClientThreadClass());
+			std::thread client_thread(&ClientThreadClass::ThreadReadBody, client_cls,
+					rms, i, range_start, range_end, num_reqs, req_type);
+			client_vector.push_back(std::move(client_cls));
+			thread_vector.push_back(std::move(client_thread));
 		}
 		break;
 	default:

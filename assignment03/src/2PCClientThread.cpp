@@ -6,6 +6,7 @@
 #include <iostream>
 #include <array>
 #include <algorithm>
+#include <vector>
 
 
 ClientThreadClass::ClientThreadClass() {}
@@ -27,7 +28,7 @@ std::array<int, 3> ClientThreadClass::generate3DinstinctRand() {
 	return result;
 }
 
-void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
+void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs,
 								   int re, int reqs, int type) {
 	customer_id = id;
 	num_reqs = reqs;
@@ -87,21 +88,40 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 				// std::cout << "RM decision " <<  tx_result << std::endl;
 			}
 			break;
-		case 3:
-			for (int i = 0; i < num_reqs; i++) {
-				tx_read read_req;
-				read_req.SetRobortId(range_start + i);
-				ReadResponse res;
-				// receive read response
-				res = stub.SendRead(read_req);
-				std::cout << range_start + i << "\t";
-				std::cout << res.GetBid() << "\t";
-				std::cout << res.GetCustomerId() << "\t";
-				std::cout << res.GetVersionNumber() << std::endl;
-		}
 		break;
 		default:
 			break;
+	}
+}
+
+void ClientThreadClass::ThreadReadBody(std::vector<RM> given_rms, int id, int rs, int re, int reqs, int type) {
+	customer_id = id;
+	num_reqs = reqs;
+	range_start = rs;
+	range_end = re;
+	rms = given_rms;
+	int current_index = range_start;
+	for (auto & rm : rms) {
+		int rm_s = rm.GetBaseKey();
+		int rm_end = rm.GetBaseKey() + rm.GetNumKvPairs() - 1;
+		if (!stub.Init(rm.GetRMIP(), rm.GetRMPort())) {
+		std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
+		return;
+		}
+
+		while (num_reqs > 0 && current_index <= rm_end && current_index >= rm_s) {
+			tx_read read_req;
+			read_req.SetRobortId(current_index);
+			current_index++;
+			ReadResponse res;
+			// receive read response
+			res = stub.SendRead(read_req);
+			std::cout << current_index << "\t";
+			std::cout << res.GetBid() << "\t";
+			std::cout << res.GetCustomerId() << "\t";
+			std::cout << res.GetVersionNumber() << std::endl;
+			num_reqs--;
+		}
 	}
 }
 
