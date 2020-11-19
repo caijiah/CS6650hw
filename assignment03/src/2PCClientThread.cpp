@@ -7,28 +7,10 @@
 #include <array>
 #include <algorithm>
 #include <vector>
-#include <ctime>
+// #include <ctime>
 
 
 ClientThreadClass::ClientThreadClass() {}
-
-std::array<int, 3> ClientThreadClass::generate3DinstinctRand() {
-	srand(time(NULL));
-	std::array<int, 3> result;
-	for (int i = 0; i < 3; i++) {
-		int r = rand() % range_end + range_start;
-		if (std::find(std::begin(result), std::end(result), r) != std::end(result)) {
-			i = i - 1;
-			continue;
-		} else {
-			result[i] = r;
-		}
-	}
-	// for (int j = 0; j < 3; j++) {
-    	// cout << result[j] << endl;
-  	// }
-	return result;
-}
 
 void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs,
 								   int re, int reqs, int type, std::vector<RM> given_rms) {
@@ -38,6 +20,7 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 	range_start = rs;
 	range_end = re;
 	int current_index;
+	srand(time(NULL));
 	if (!stub.Init(ip, port)) {
 		std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
 		return;
@@ -64,11 +47,13 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 				std::array<tx_read, 3> tx_reads;
 				// tx writes
 				std::array<tx_write, 3> tx_writes;
-
-				std::array<int, 3> rands = generate3DinstinctRand();
+				// std::array<int, 3> rands = generate3DinstinctRand();
 				for (int j = 0; j < 3 ; j++) {
 					// rid
-					int robot_id = rands[j];
+					int robot_id = rand() % range_end + range_start;
+
+					std::cout << "rand is " << robot_id << std::endl;
+					// int robot_id = rands[j];
 					// sent a read request
 					tx_read read_req;
 					read_req.SetRobortId(robot_id);

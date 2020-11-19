@@ -1,8 +1,6 @@
 #ifndef __CLIENT_THREAD_H__
 #define __CLIENT_THREAD_H__
 
-#include <chrono>
-#include <ctime>
 #include <string>
 #include <vector>
 #include <memory>
