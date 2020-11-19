@@ -157,6 +157,7 @@ void RobotFactory::TXThread(int id) {
                 tx_read each_read = tx_reads[i];
                 each_read.Print();
                 int read_rid = each_read.GetRobotId();
+								read_rid = read_rid % kv_tbl_size;
                 if (read_rid >= kv_base && read_rid <= (kv_base + kv_tbl_size - 1)) {
                     int read_ver = each_read.GetVersionNumber();
                     kv_table_lock.lock();
@@ -185,6 +186,7 @@ void RobotFactory::TXThread(int id) {
                     tx_write each_write = tx_writes[j];
 										each_write.Print();
                     int write_rid = each_write.GetRobotId();
+										write_rid = write_rid % kv_tbl_size;
                     if ( write_rid >= kv_base && write_rid <= (kv_base + kv_tbl_size - 1)) {
                         int new_bid = each_write.GetBid();
                         int write_cid = each_write.GetCustomerId();
