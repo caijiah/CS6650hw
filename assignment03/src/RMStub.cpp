@@ -50,6 +50,7 @@ int ServerStub::ReceiveTMReq() {
 }
 
 int ServerStub::SendDecision(int d) {
+	// send decsion to TM
 	char buffer[8];
     int net_identify = htonl(TM_RM_IDENTIFY);
 	int net_d = htonl(d);
