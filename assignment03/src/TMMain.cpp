@@ -33,8 +33,6 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-	std::cout << num_RMs << std::endl;
-
 	for (int i = 0; i < num_RMs; i++) {
 		RM new_rm;
 		new_rm.SetRMIP(argv[3 + i*4]);
@@ -42,7 +40,6 @@ int main(int argc, char *argv[]) {
 		new_rm.SetNumKvPairs(atoi(argv[3 + i*4 + 2]));
 		new_rm.SetBaseKey(atoi(argv[3 + i*4 + 3]));
 		rms.push_back(new_rm);
-		std::cout << i << std::endl;
 	}
 
 	factory.SetUpKvTable(num_RMs, rms);

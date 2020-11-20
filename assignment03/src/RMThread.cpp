@@ -70,7 +70,7 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 				tx_r = stub.ReceiveTxRead();
 				robot_id = tx_r.GetRobotId();
 				robot_id = robot_id % kv_tbl_size;
-				std::cout << "r_id is " << robot_id << std::endl;
+				// std::cout << "r_id is " << robot_id << std::endl;
 				kv_table_lock.lock();
 				kv_pair = kv_table[robot_id];
 				kv_table_lock.unlock();

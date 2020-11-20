@@ -68,10 +68,9 @@ void RobotFactory::TXThread(int id) {
     if (!rms_connection) {
         for (auto & rm : rms) {
             std::unique_ptr<ClientStub> rm_stub = std::unique_ptr<ClientStub>(new ClientStub);
-  			if (rm_stub->Init(rm.GetRMIP(), rm.GetRMPort())) {
-          std::cout << "connection" << std::endl;
-  				rm_connections.push_back(std::move(rm_stub));
-  			}
+      			if (rm_stub->Init(rm.GetRMIP(), rm.GetRMPort())) {
+      				rm_connections.push_back(std::move(rm_stub));
+      			}
         }
         rms_connection = true;
     }

@@ -34,6 +34,10 @@ int main(int argc, char *argv[]) {
 	range_end = atoi(argv[4]);
 	num_customers = atoi(argv[5]);
 	num_reqs = atoi(argv[6]);
+	if (num_reqs > range_end + 1) {
+		std::cout << "out of RM range" << std::endl;
+		return 0;
+	}
 	robot_type = atoi(argv[7]);
 
 
@@ -54,7 +58,10 @@ int main(int argc, char *argv[]) {
 	for (auto& cls : client_vector) {
 		timer.Merge(cls->GetTimer());
 	}
-	timer.PrintStats();
+
+	if (robot_type == 1) {
+		timer.PrintStats();
+	}
 
 	return 1;
 }

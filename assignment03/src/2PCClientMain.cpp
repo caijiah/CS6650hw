@@ -95,7 +95,9 @@ int main(int argc, char *argv[]) {
 	for (auto& cls : client_vector) {
 		timer.Merge(cls->GetTimer());
 	}
-	timer.PrintStats();
+	if (req_type == 1) {
+		timer.PrintStats();
+	}
 	return 1;
 
 }

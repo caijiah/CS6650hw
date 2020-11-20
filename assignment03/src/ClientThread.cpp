@@ -10,20 +10,6 @@
 
 ClientThreadClass::ClientThreadClass() {}
 
-std::array<int, 3> ClientThreadClass::generate3DinstinctRand() {
-	std::array<int, 3> result;
-	for (int i = 0; i < 3; i++) {
-		int r = rand() % range_end + range_start;
-		if (std::find(std::begin(result), std::end(result), r) != std::end(result)) {
-			i = i - 1;
-			continue;
-		} else {
-			result[i] = r;
-		}
-	}
-	return result;
-}
-
 void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 								   int re, int reqs, int type) {
 	customer_id = id;
@@ -31,6 +17,7 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 	robot_type = type;
 	range_start = rs;
 	range_end = re;
+	srand(time(NULL));
 	if (!stub.Init(ip, port)) {
 		std::cout << "Thread " << customer_id << " failed to connect" << std::endl;
 		return;
@@ -46,10 +33,9 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 				// tx writes
 				std::array<tx_write, 3> tx_writes;
 
-				std::array<int, 3> rands = generate3DinstinctRand();
 				for (int j = 0; j < 3 ; j++) {
 					// rid
-					int robot_id = rands[j];
+			    int robot_id = rand() % (range_end - range_start + 1) + range_start;
 					// sent a read request
 					tx_read read_req;
 					read_req.SetRobortId(robot_id);
@@ -88,11 +74,13 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 				read_req.SetRobortId(range_start + i);
 				ReadResponse res;
 				// receive read response
-				res = stub.SendRead(read_req);
-				std::cout << range_start + i << "\t";
-				std::cout << res.GetBid() << "\t";
-				std::cout << res.GetCustomerId() << "\t";
-				std::cout << res.GetVersionNumber() << std::endl;
+				if (i <= range_end) {
+					res = stub.SendRead(read_req);
+					std::cout << range_start + i << "\t";
+					std::cout << res.GetBid() << "\t";
+					std::cout << res.GetCustomerId() << "\t";
+					std::cout << res.GetVersionNumber() << std::endl;
+				}
 		}
 		break;
 		default:

@@ -15,7 +15,7 @@ class ClientThreadClass {
 	int range_start;
 	int range_end;
 	ClientStub stub;
-	
+
 
 	ClientTimer timer;
 public:
@@ -23,7 +23,6 @@ public:
 	void ThreadBody(std::string ip, int port, int id, int rs,
 					int re, int reqs, int type);
 	ClientTimer GetTimer();
-	std::array<int, 3> generate3DinstinctRand();
 };
 
 
