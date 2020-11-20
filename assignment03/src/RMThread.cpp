@@ -69,6 +69,8 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 			case TX_READ_IDENTIFY:
 				tx_r = stub.ReceiveTxRead();
 				robot_id = tx_r.GetRobotId();
+				robot_id = robot_id % kv_tbl_size;
+				std::cout << "r_id is " << robot_id << std::endl;
 				kv_table_lock.lock();
 				kv_pair = kv_table[robot_id];
 				kv_table_lock.unlock();
@@ -76,6 +78,8 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 				version = kv_pair.version;
 				customer_id = kv_pair.customer_id;
 				rd_res.SetInfo(bidding_info, customer_id, version);
+				// std::cout << "return a read res: " << std::endl;
+				// rd_res.Print();
 				stub.SendReadResponse(rd_res);
 				break;
 			case TX_IDENTIFY:
@@ -125,8 +129,8 @@ void RobotFactory::TXThread(int id) {
             for (int i = 0; i < 3; i++) {
                 tx_read each_read = tx_reads[i];
                 int read_rid = each_read.GetRobotId();
-								read_rid = read_rid % kv_tbl_size;
                 if (read_rid >= kv_base && read_rid <= (kv_base + kv_tbl_size - 1)) {
+										read_rid = read_rid % kv_tbl_size;
                     int read_ver = each_read.GetVersionNumber();
                     kv_table_lock.lock();
                     // copy
@@ -150,11 +154,13 @@ void RobotFactory::TXThread(int id) {
                 for (int j = 0; j < 3; j++) {
                     tx_write each_write = tx_writes[j];
                     int write_rid = each_write.GetRobotId();
-					write_rid = write_rid % kv_tbl_size;
                     if ( write_rid >= kv_base && write_rid <= (kv_base + kv_tbl_size - 1)) {
+												write_rid = write_rid % kv_tbl_size;
                         int new_bid = each_write.GetBid();
                         int write_cid = each_write.GetCustomerId();
                         kv_value new_entry;
+												// std::cout << "write a bid: " << std::endl;
+												// each_write.Print();
                         new_entry.bid = new_bid;
                         new_entry.customer_id = write_cid;
                         new_entry.version = local_tx.GetVersionNumber();

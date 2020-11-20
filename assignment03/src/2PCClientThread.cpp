@@ -49,7 +49,7 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 				std::array<tx_write, 3> tx_writes;
 				for (int j = 0; j < 3 ; j++) {
 					// rid
-					int robot_id = rand() % range_end + range_start;
+					int robot_id = rand() % (range_end - range_start + 1) + range_start;
 					// sent a read request
 					tx_read read_req;
 					read_req.SetRobortId(robot_id);
@@ -70,8 +70,12 @@ void ClientThreadClass::ThreadWriteBody(std::string ip, int port, int id, int rs
 					tx_reads[j] = read_req;
 					// add write info into the TX
 					int read_bd = res.GetBid();
+					// std::cout<< customer_id << "thread receive a res: " << std::endl;
+					// res.Print();
 					tx_write write_req;
 					write_req.SetInfo(robot_id, read_bd + 1, customer_id);
+					// std::cout<< customer_id << "thread make a write: " << std::endl;
+					// write_req.Print();
 					tx_writes[j] = write_req;
 				}
 				transcation.SetTxReads(tx_reads);

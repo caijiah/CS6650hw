@@ -68,9 +68,10 @@ void RobotFactory::TXThread(int id) {
     if (!rms_connection) {
         for (auto & rm : rms) {
             std::unique_ptr<ClientStub> rm_stub = std::unique_ptr<ClientStub>(new ClientStub);
-			if (rm_stub->Init(rm.GetRMIP(), rm.GetRMPort())) {
-				rm_connections.push_back(std::move(rm_stub));
-			}
+  			if (rm_stub->Init(rm.GetRMIP(), rm.GetRMPort())) {
+          std::cout << "connection" << std::endl;
+  				rm_connections.push_back(std::move(rm_stub));
+  			}
         }
         rms_connection = true;
     }
@@ -94,6 +95,8 @@ void RobotFactory::TXThread(int id) {
 
         bool final_decision = true;
         for (auto & rm_connection: rm_connections) {
+            // std::cout << "sent a tx : " << std::endl;
+            // transaction.Print();
             int decision = rm_connection->SendTX(transaction);
             if (decision == -1) {
                 final_decision = false;
@@ -102,6 +105,8 @@ void RobotFactory::TXThread(int id) {
 
         if (final_decision) {
             req->decision.set_value(1);
+            // std::cout << "commit the tx: " << std::endl;
+            // transaction.Print();
         } else {
             req->decision.set_value(-1);
         }
