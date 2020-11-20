@@ -64,12 +64,10 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 				version = kv_pair.version;
 				customer_id = kv_pair.customer_id;
 				rd_res.SetInfo(bidding_info, customer_id, version);
-				rd_res.Print();
 				stub.SendReadResponse(rd_res);
 				break;
 			case TX_IDENTIFY:
 				transaction = stub.ReceiveTX();
-				transaction.Print();
 				result = SendToTXThread(transaction);
 				stub.SendDecision(result);
 				break;
@@ -104,7 +102,6 @@ void RobotFactory::TXThread(int id) {
 		bool check_reads = true;
 		for (int i = 0; i < 3; i++) {
 			tx_read each_read = tx_reads[i];
-			each_read.Print();
 			int read_rid = each_read.GetRobotId();
 			int read_ver = each_read.GetVersionNumber();
 			kv_table_lock.lock();
@@ -120,7 +117,6 @@ void RobotFactory::TXThread(int id) {
 			// commit
 			for (int j = 0; j < 3; j++) {
 				tx_write each_write = tx_writes[j];
-				each_write.Print();
 				int new_bid = each_write.GetBid();
 				int write_rid = each_write.GetRobotId();
 				int write_cid = each_write.GetCustomerId();

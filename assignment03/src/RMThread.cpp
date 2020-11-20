@@ -68,7 +68,6 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 		switch (identity) {
 			case TX_READ_IDENTIFY:
 				tx_r = stub.ReceiveTxRead();
-				//tx_r.Print();
 				robot_id = tx_r.GetRobotId();
 				kv_table_lock.lock();
 				kv_pair = kv_table[robot_id];
@@ -77,7 +76,6 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 				version = kv_pair.version;
 				customer_id = kv_pair.customer_id;
 				rd_res.SetInfo(bidding_info, customer_id, version);
-				rd_res.Print();
 				stub.SendReadResponse(rd_res);
 				break;
 			case TX_IDENTIFY:
@@ -126,7 +124,6 @@ void RobotFactory::TXThread(int id) {
 						check_reads = true;
             for (int i = 0; i < 3; i++) {
                 tx_read each_read = tx_reads[i];
-                each_read.Print();
                 int read_rid = each_read.GetRobotId();
 								read_rid = read_rid % kv_tbl_size;
                 if (read_rid >= kv_base && read_rid <= (kv_base + kv_tbl_size - 1)) {
