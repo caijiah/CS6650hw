@@ -41,6 +41,5 @@ int main(int argc, char *argv[]) {
 				std::move(new_socket), worker_cnt++);
 		thread_vector.push_back(std::move(worker_thread));
 	}
-	std::cout << "main quit" << std::endl;
 	return 0;
 }

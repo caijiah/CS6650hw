@@ -48,11 +48,7 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 	stub.Init(std::move(socket));
 
 	while (true) {
-		std::cout << "try to read " << std::endl;
-		// IdentifyMessage identity_msg;
 		identity = stub.ReadIdentify();
-		// identity = identity_msg.();
-		std::cout << "identity: " << identity << std::endl;
 		if (identity == -1) {
 			break;
 		}
@@ -75,16 +71,13 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 				transaction = stub.ReceiveTX();
 				transaction.Print();
 				result = SendToTXThread(transaction);
-				// std::cout << "decision ?" << result << std::endl;
 				stub.SendDecision(result);
-				// std::cout << "finsihed ?" << std::endl;
 				break;
 			default:
 				std::cout << "Undefined request type: "
 					<< identity << std::endl;
 					break;
 		}
-		// stub.SendRobot(robot);
 	}
 }
 
@@ -118,8 +111,6 @@ void RobotFactory::TXThread(int id) {
 			// copy
 			kv_value kv_pair = kv_table[read_rid];
 			kv_table_lock.unlock();
-			std::cout << "kv_version " << kv_pair.version << std::endl;
-			std::cout << "read_ver " << read_ver << std::endl;
 			if (read_ver < kv_pair.version) {
 				check_reads = false;
 			}
@@ -139,11 +130,7 @@ void RobotFactory::TXThread(int id) {
 				new_entry.version = local_version;
 				kv_table_lock.lock();
 				kv_table[write_rid] = new_entry;
-				std::cout << kv_table[write_rid].bid;
-				std::cout << kv_table[write_rid].customer_id;
-				std::cout << kv_table[write_rid].version;
 				kv_table_lock.unlock();
-				// std::cout << "commited "<< write_rid << std::endl;
 			}
 			req->decision.set_value(1);
 		} else {
@@ -151,5 +138,4 @@ void RobotFactory::TXThread(int id) {
 			req->decision.set_value(-1);
 		}
 	}
-	std::cout << "quit" << std::endl;
 }

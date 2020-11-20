@@ -51,16 +51,9 @@ int main(int argc, char *argv[]) {
 	for (int i = 0; i < num_RMs; i++) {
 		RM new_rm;
 		new_rm.SetRMIP(argv[4 + i*4]);
-		std::cout << "ip " << argv[4 + i*4] << std::endl;
 		new_rm.SetRMPort(atoi(argv[4 + i*4 + 1]));
-		std::cout << "port " << atoi(argv[4 + i*4 + 1]) << std::endl;
-
 		new_rm.SetNumKvPairs(atoi(argv[4 + i*4 + 2]));
-		std::cout << "nv_pairs " << atoi(argv[4 + i*4 + 2]) << std::endl;
-
 		new_rm.SetBaseKey(atoi(argv[4 + i*4 + 3]));
-		std::cout << "base " << atoi(argv[4 + i*4 + 3]) << std::endl;
-
 		int rm_start = new_rm.GetBaseKey();
 		int rm_end = rm_start + new_rm.GetNumKvPairs() - 1;
 		if (rm_start < min_rm_start) {
@@ -78,11 +71,6 @@ int main(int argc, char *argv[]) {
 	num_customers = atoi(argv[after_parse + 2]);
 	num_reqs = atoi(argv[after_parse + 3]);
 	req_type = atoi(argv[after_parse + 4]);
-
-	std::cout << "min_rm_start " << min_rm_start << std::endl;
-	std::cout << "max_rm_start " << max_rm_end << std::endl;
-	std::cout << "range_start " << range_start << std::endl;
-	std::cout << "range_end " << range_end << std::endl;
 
 	if (!(range_start >= min_rm_start && range_end <= max_rm_end)) {
 			std::cout << "out of RMs range" << std::endl;

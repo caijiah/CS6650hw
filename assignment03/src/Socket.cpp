@@ -52,7 +52,6 @@ int Socket::Recv(char *buffer, int size, int flags) {
 	int offset = 0;
 	while (size > 0) {
 		bytes_read = recv(fd_, buffer + offset, size, flags);
-		std::cout <<"socket Recv" << std::endl;
 		if (bytes_read <= 0) {
 			/*
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {

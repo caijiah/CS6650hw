@@ -46,11 +46,7 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 	stub.Init(std::move(socket));
 
 	while (true) {
-		std::cout << "try to read " << std::endl;
-		// IdentifyMessage identity_msg;
 		identity = stub.ReadIdentify();
-		// identity = identity_msg.();
-		std::cout << "identity: " << identity << std::endl;
 		if (identity == -1) {
 			break;
 		}
@@ -59,16 +55,13 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 				transaction = stub.ReceiveTX();
 				transaction.Print();
 				result = SendToTXThread(transaction);
-				// std::cout << "decision ?" << result << std::endl;
 				stub.SendDecision(result);
-				// std::cout << "finsihed ?" << std::endl;
 				break;
 			default:
 				std::cout << "Undefined request type: "
 					<< identity << std::endl;
 					break;
 		}
-		// stub.SendRobot(robot);
 	}
 }
 
@@ -99,8 +92,6 @@ void RobotFactory::TXThread(int id) {
 		std::this_thread::sleep_for(std::chrono::microseconds(100));
 		tx transaction = req->transaction;
 		transaction.SetVersionNumber(local_version);
-    std::cout << "check trans: " << std::endl;
-    transaction.Print();
 
         bool final_decision = true;
         for (auto & rm_connection: rm_connections) {
@@ -109,8 +100,6 @@ void RobotFactory::TXThread(int id) {
                 final_decision = false;
             }
         }
-
-        std::cout << "TM receive decison" << final_decision << std::endl;
 
         if (final_decision) {
             req->decision.set_value(1);
@@ -121,5 +110,4 @@ void RobotFactory::TXThread(int id) {
             rm_connection->SendCommitAbort(final_decision);
         }
 	}
-	// std::cout << "quit" << std::endl;
 }

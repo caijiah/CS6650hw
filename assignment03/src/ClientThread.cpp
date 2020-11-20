@@ -70,19 +70,16 @@ void ClientThreadClass::ThreadBody(std::string ip, int port, int id, int rs,
 					tx_writes[j] = write_req;
 				}
 				transcation.SetTxReads(tx_reads);
-				// for (int )
 				transcation.SetTxWrites(tx_writes);
 				// transcation.Print();
 				timer.Start();
 				int tx_result = stub.SendTX(transcation);
 				timer.EndAndMerge();
-				std::cout << tx_result << std::endl;
 				if (tx_result == 1) {
 					timer.CommitIncrement();
 				} else {
 					timer.AbortIncrement();
 				}
-				// std::cout << "RM decision " <<  tx_result << std::endl;
 			}
 			break;
 		case 3:

@@ -13,7 +13,6 @@ void ServerStub::Init(std::unique_ptr<ServerSocket> socket) {
 int ServerStub::ReadIdentify() {
 	char buffer[4];
 	int net_identify;
-	std::cout << "read" << std::endl;
 	if (socket->Recv(buffer, sizeof(net_identify), 0)) {
 		memcpy(&net_identify, buffer, sizeof(net_identify));
 		return ntohl(net_identify);
