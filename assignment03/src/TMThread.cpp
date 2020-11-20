@@ -53,6 +53,8 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 		switch (identity) {
 			case TX_IDENTIFY:
 				transaction = stub.ReceiveTX();
+        // std::cout << "Receive a TX: " << std::endl;
+        // transaction.Print(); 
 				result = SendToTXThread(transaction);
 				stub.SendDecision(result);
 				break;

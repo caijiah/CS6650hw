@@ -53,6 +53,7 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 	kv_value kv_pair;
 	int result = -1;
   int final_decision;
+	int search_id;
     // std::unique_ptr<TXRequest> tx_req;
 
 
@@ -69,10 +70,10 @@ void RobotFactory::WokerThread(std::unique_ptr<ServerSocket> socket, int id) {
 			case TX_READ_IDENTIFY:
 				tx_r = stub.ReceiveTxRead();
 				robot_id = tx_r.GetRobotId();
-				robot_id = robot_id % kv_tbl_size;
+				search_id = robot_id % kv_tbl_size;
 				// std::cout << "r_id is " << robot_id << std::endl;
 				kv_table_lock.lock();
-				kv_pair = kv_table[robot_id];
+				kv_pair = kv_table[search_id];
 				kv_table_lock.unlock();
 				bidding_info = kv_pair.bid;
 				version = kv_pair.version;
@@ -119,6 +120,8 @@ void RobotFactory::TXThread(int id) {
 				int final_decision;
 				std::array<tx_read, 3> tx_reads;
 				std::array<tx_write, 3> tx_writes;
+				int search_read_id;
+				int search_write_id;
 
         switch (identity)
         {
@@ -130,11 +133,11 @@ void RobotFactory::TXThread(int id) {
                 tx_read each_read = tx_reads[i];
                 int read_rid = each_read.GetRobotId();
                 if (read_rid >= kv_base && read_rid <= (kv_base + kv_tbl_size - 1)) {
-										read_rid = read_rid % kv_tbl_size;
+										search_read_id = read_rid % kv_tbl_size;
                     int read_ver = each_read.GetVersionNumber();
                     kv_table_lock.lock();
                     // copy
-                    kv_value kv_pair = kv_table[read_rid];
+                    kv_value kv_pair = kv_table[search_read_id];
                     kv_table_lock.unlock();
                     if (read_ver < kv_pair.version) {
                         check_reads = false;
@@ -155,7 +158,7 @@ void RobotFactory::TXThread(int id) {
                     tx_write each_write = tx_writes[j];
                     int write_rid = each_write.GetRobotId();
                     if ( write_rid >= kv_base && write_rid <= (kv_base + kv_tbl_size - 1)) {
-												write_rid = write_rid % kv_tbl_size;
+												search_write_id = write_rid % kv_tbl_size;
                         int new_bid = each_write.GetBid();
                         int write_cid = each_write.GetCustomerId();
                         kv_value new_entry;
@@ -165,7 +168,7 @@ void RobotFactory::TXThread(int id) {
                         new_entry.customer_id = write_cid;
                         new_entry.version = local_tx.GetVersionNumber();
                         kv_table_lock.lock();
-                        kv_table[write_rid] = new_entry;
+                        kv_table[search_write_id] = new_entry;
                         kv_table_lock.unlock();
                     }
 			    		}
